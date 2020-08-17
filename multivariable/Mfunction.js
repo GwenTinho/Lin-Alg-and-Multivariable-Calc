@@ -125,6 +125,10 @@ class MFunction {
         // research this and make it work
     }
 
+    getCurl() {
+        // implement this for 2d and 3d, then figure out that weird generalisation
+    }
+
     static paramDeriv(t, paramFn) { // R -> R^n // dont use repeated
         // t is a scalar
         const h = 1e-10;
