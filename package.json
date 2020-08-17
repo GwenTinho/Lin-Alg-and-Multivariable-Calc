@@ -1,0 +1,20 @@
+{
+  "name": "matricies",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "nodemon --exec babel-node --max-old-space-size=8192 index",
+    "start": "babel-node --max-old-space-size=8192 index"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/polyfill": "^7.2.5",
+    "@babel/preset-env": "^7.10.4",
+    "nodemon": "^1.18.9"
+  }
+}
