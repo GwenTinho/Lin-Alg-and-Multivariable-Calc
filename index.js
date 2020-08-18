@@ -8,11 +8,13 @@ import bernoulli from "./bernoulli/bernoulli";
 import Mfunction from "./multivariable/Mfunction";
 
 
-let f = new Mfunction(2);
-f.setOutput([
-    v => v.get(0) * v.get(1),
-    v => v.get(1) ** 2 - v.get(0) ** 2
-]);
+let f = new Mfunction(2, 2,
+    v => new Vector(
+        [
+            v.get(0) * v.get(1),
+            v.get(1) ** 2 - v.get(0) ** 2
+        ])
+);
 
 f.initJacobian()
 

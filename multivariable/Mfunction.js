@@ -2,7 +2,7 @@ import Vector from "../Vector";
 import Matrix from "../Matrix";
 
 class MFunction {
-    constructor(inputDimensions) { // parametric as in R -> R^n
+    constructor(inputDimensions, outputDimensions, vectorfn) { // parametric as in R -> R^n
         this.isOutputSet = false;
         this.inputDimensions = inputDimensions;
         this.outputDimensions;
@@ -14,20 +14,15 @@ class MFunction {
         this.isHessianSet = false;
         this.getHessianAt;
         this.isScalarValued;
+        this.setOutput(vectorfn, outputDimensions);
     }
 
-    setOutput(functionArray) {
-        this.outputDimensions = functionArray.length;
+    setOutput(vectorfn, outputDimensions) { // instead of functionarray use a function that simply takes in one vector and outputs another vector or scalar depending on the type
+        this.outputDimensions = outputDimensions;
         if (this.outputDimensions === 1) {
             this.isScalarValued = true;
-            this.calc = t => { // t can be a vector or scalar
-                return functionArray[0](t);
-            }
-            return this;
         }
-        this.calc = t => {
-            return new Vector(functionArray.map(fn => fn(t)));
-        }
+        this.calc = vectorfn;
         this.isOutputSet = true;
         return this;
     }
@@ -107,13 +102,7 @@ class MFunction {
 
         let hessianGenerator = new MFunction(this.inputDimensions);
 
-        let gradientFnArray = [];
-
-        for (let index = 0; index < this.inputDimensions; index++) {
-            gradientFnArray.push(v => this.getGradientAt(v).get(index));
-        }
-
-        hessianGenerator.setOutput(gradientFnArray);
+        hessianGenerator.setOutput(this.getGradientAt);
 
         hessianGenerator.initJacobian();
 
