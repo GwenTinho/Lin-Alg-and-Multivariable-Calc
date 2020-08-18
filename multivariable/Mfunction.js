@@ -95,14 +95,22 @@ class MFunction {
         return this.getJacobianAt(t).trace();
     }
 
+    getLaplacian(t) {
+        if (!this.isOutputSet) return new Error("invalid structure for laplacian");
+        if (!this.isScalarValued) return new Error("invalid structure for laplacian (not scalar valued)");
+
+        let laplacianGenerator = new MFunction(this.inputDimensions, this.inputDimensions, this.getGradientAt);
+
+        return laplacianGenerator.getDivergence(t); // test this too
+    }
+
     initHessian() {
-        if (!this.isOutputSet || !this.isScalarValued) return new Error("invalid structure for Hessian");
+        if (!this.isOutputSet) return new Error("invalid structure for Hessian");
+        if (!this.isScalarValued) return new Error("invalid structure for Hessian (not scalar valued)");
 
         if (!this.isJacobianSet) this.initJacobian();
 
-        let hessianGenerator = new MFunction(this.inputDimensions);
-
-        hessianGenerator.setOutput(this.getGradientAt);
+        let hessianGenerator = new MFunction(this.inputDimensions, this.inputDimensions, this.getGradientAt);
 
         hessianGenerator.initJacobian();
 
