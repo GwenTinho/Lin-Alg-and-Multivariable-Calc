@@ -40,6 +40,38 @@ class MFunction {
         }
     }
 
+    secondPartialDerivative(index1, index2) {
+        if (this.isParamFn) return new Error("invalid structure for scnd partial deriv");
+
+        return v => { // v is a vector
+            const h = 1e-5;
+
+            let u = v.copyInstance();
+            let w = v.copyInstance();
+            let t = v.copyInstance();
+
+            // technicality: scalar has to be used as 1x1 vector to allow for matrix operators
+
+            const multiplier = 0.25 / (h ** 2); // uses midpoint for more accuracy // also need to add this to the other derivation algs
+
+            const v4 = t.addToRow(index1, -h).addToRow(index2, h);
+            const v3 = w.addToRow(index1, h).addToRow(index2, -h);
+            const v2 = v.addToRow(index1, h).addToRow(index2, h);
+            const v1 = u.addToRow(index1, -h).addToRow(index2, -h);
+
+            if (this.isScalarValued) {
+                const homoVScalar = this.calc(v1) + this.calc(v2);
+                const heterVScalar = this.calc(v3) + this.calc(v4);
+                return new Vector([(homoVScalar - heterVScalar) * multiplier]);
+            }
+
+            const homoVScalar = this.calc(v1).add(this.calc(v2));
+            const heterVScalar = this.calc(v3).add(this.calc(v4));
+            return homoVScalar.sub(heterVScalar).mult(multiplier);
+
+        }
+    }
+
     initJacobian() {
         if (this.isParamFn) {
             this.getJacobianAt = t => MFunction.paramDeriv(t, this.calc);
@@ -65,7 +97,7 @@ class MFunction {
 
         const dS = MFunction.paramDeriv(t, this.calc); // 1st deriv
 
-        const ddS = MFunction.secondParaDeriv(t, this.calc); // 2nd deriv
+        const ddS = MFunction.secondParamDeriv(t, this.calc); // 2nd deriv
 
         const ddSNormSquared = ddS.getNormSquared();
         const dSNormSquared = dS.getNormSquared();
@@ -100,22 +132,33 @@ class MFunction {
         return this.getHessianAt(v).trace();
 
         // why it works: laplacian f = div(grad f) = trace(J(grad f)) = trace(H(f))
-
-        // implement proper nth derivative algorithms
     }
 
     initHessian() {
         if (!this.isScalarValued) return new Error("invalid structure for Hessian (not scalar valued)");
 
-        let hessianGenerator = new MFunction(this.inputDimensions, this.inputDimensions, this.getGradientAt);
+        this.getHessianAt = v => {
+            let vectors = [];
+            for (let col = 0; col < this.inputDimensions; col++) {
+                let coords = [];
 
-        this.getHessianAt = hessianGenerator.getJacobianAt; // needs testing
+                for (let row = 0; row < this.inputDimensions; row++) {
+                    coords.push(this.secondPartialDerivative(row, col)(v).get(0));
+                }
+                vectors.push(new Vector(coords));
+            }
 
-        // implement proper nth derivative algorithms
+            return new Matrix(vectors);
+        }
+        this.isHessianSet = true;
     }
 
     secondDeriveTest() {
         // research this and make it work
+    }
+
+    getNthPartialDeriv() {
+        // some day ...
     }
 
     getCurl(v) {
@@ -166,7 +209,7 @@ class MFunction {
         return v2;
     }
 
-    static secondParaDeriv(t, paramFn) {
+    static secondParamDeriv(t, paramFn) {
         // t is a scalar
         const h = 1e-6;
         const v1 = paramFn(t + 2 * h);
@@ -175,6 +218,10 @@ class MFunction {
 
         v1.sub(v2).add(v3).mult(1 / (h * h));
         return v1;
+    }
+
+    static nthParamDeriv() {
+        // also some day ...
     }
 }
 
