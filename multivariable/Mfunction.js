@@ -1,19 +1,21 @@
 import Vector from "../Vector";
 import Matrix from "../Matrix";
 
+// a class that describes a multivariable function R^n -> R^m and implements a bunch of operators for that function
+
 class MFunction {
-    constructor(inputDimensions, outputDimensions, vectorfn) { // parametric as in R -> R^n
+    constructor(inputDimensions, outputDimensions, vectorfn) {
         this.inputDimensions = inputDimensions >= 1 ? inputDimensions : 1;
         this.outputDimensions = outputDimensions >= 1 ? outputDimensions : 1;
-        this.isParamFn = inputDimensions === 1;
+        this.isParamFn = inputDimensions === 1; // parametric as in R -> R^n
         this.calc;
         this.isJacobianSet = false;
         this.getJacobianAt;
         this.getGradientAt;
         this.isHessianSet = false;
         this.getHessianAt;
-        this.isScalarValued = this.outputDimensions === 1;
-        this.isVectorField = this.outputDimensions === this.inputDimensions;
+        this.isScalarValued = this.outputDimensions === 1; // scalar as in R^n -> R
+        this.isVectorField = this.outputDimensions === this.inputDimensions; // vector field as in R^n -> R^n
         this.setOutput(vectorfn, outputDimensions);
     }
 
@@ -22,12 +24,12 @@ class MFunction {
         return this;
     }
 
-    partialDerivative(index) { // R^n -> R^m
+    partialDerivative(index) { // R^n -> R^m // returns a function that returns a vector with all the derivatives with respect to the variable at index
         if (this.isParamFn) return new Error("invalid structure for partial deriv");
-        return t => { // t is a vector
+        return v => { // v is a vector
             const h = 1e-10;
-            let s = t.copyInstance();
-            return this.calc(t.addToRow(index, h)).sub(this.calc(s.addToRow(index, -h))).mult(0.5 / h);
+            let u = v.copyInstance();
+            return this.calc(v.addToRow(index, h)).sub(this.calc(u.addToRow(index, -h))).mult(0.5 / h);
         }
     }
 
@@ -91,8 +93,9 @@ class MFunction {
 
         let laplacianGenerator = new MFunction(this.inputDimensions, this.inputDimensions, this.getGradientAt);
 
-        return laplacianGenerator.getDivergence(t);
+        return laplacianGenerator.getDivergence(t); // tr(J(grad(f)))
 
+        // needs testing
         // fun fact: laplacian = trace of Hessian, which would be slower than out code here but still
     }
 
@@ -113,15 +116,23 @@ class MFunction {
         // research this and make it work
     }
 
-    getCurl() {
+    getCurl(v) {
         if (!this.isVectorField) return new Error("invalid structure for Curl (not a vector field)");
-        if (this.inputDimensions == 2) { // 2d case
+        if (this.inputDimensions == 2) { // 2d case R^2 -> R (actually still R^3 to R^3 but a bit compressed)
+
+            // WRT means with respect to, i.e. partialQ / partialX
+
+            const qWRTx = this.partialDerivative(0)(v).get(1); // index 0 is x index 1 is Q (f(x,y) = [P(x,y), Q(x,y)]^T)
+            const pWRTy = this.partialDerivative(1)(v).get(0);
+
+            return qWRTx - pWRTy; // z coordinate of the 3d vector (in reality curl(f) = [0,0, 2d-curl(f)]^T)
+        }
+        if (this.inputDimensions == 3) { // 3d case R^3 -> R^3
             // do things
         }
-        if (this.inputDimensions == 3) { // 3d case
+        if (this.inputDimensions > 3) {
             // do things
         }
-        // implement this for 2d and 3d, then figure out that weird generalisation
     }
 
     static paramDeriv(t, paramFn) { // R -> R^n // dont use repeated

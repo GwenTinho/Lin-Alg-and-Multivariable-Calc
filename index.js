@@ -11,11 +11,9 @@ import Mfunction from "./multivariable/Mfunction";
 let f = new Mfunction(2, 2,
     v => new Vector(
         [
-            v.get(0) * v.get(1),
-            v.get(1) ** 2 - v.get(0) ** 2
+            v.get(1) ** 3 - 9 * v.get(1),
+            v.get(0) ** 3 - 9 * v.get(0)
         ])
 );
 
-f.initJacobian()
-
-console.log(f.getDivergence(new Vector([0, -4])));
+console.log(f.getCurl(new Vector([5, 0])));
