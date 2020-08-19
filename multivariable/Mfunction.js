@@ -17,6 +17,8 @@ class MFunction {
         this.isScalarValued = this.outputDimensions === 1; // scalar as in R^n -> R
         this.isVectorField = this.outputDimensions === this.inputDimensions; // vector field as in R^n -> R^n
         this.setOutput(vectorfn, outputDimensions);
+        this.initJacobian();
+        this.initHessian();
     }
 
     setOutput(vectorfn) { // instead of functionarray use a function that simply takes in one vector and outputs another vector or scalar depending on the type
@@ -83,7 +85,6 @@ class MFunction {
 
     getDivergence(t) {
         if (!this.isVectorField) return new Error("invalid structure for Divergence (not a vector field)");
-        if (!this.isJacobianSet) this.initJacobian();
 
         return this.getJacobianAt(t).trace();
     }
@@ -102,14 +103,9 @@ class MFunction {
     initHessian() {
         if (!this.isScalarValued) return new Error("invalid structure for Hessian (not scalar valued)");
 
-        if (!this.isJacobianSet) this.initJacobian();
-
         let hessianGenerator = new MFunction(this.inputDimensions, this.inputDimensions, this.getGradientAt);
 
-        hessianGenerator.initJacobian();
-
         this.getHessianAt = hessianGenerator.getJacobianAt;
-        this.isHessianSet = true; // this needs a lot of testing
     }
 
     secondDeriveTest() {
@@ -128,7 +124,26 @@ class MFunction {
             return qWRTx - pWRTy; // z coordinate of the 3d vector (in reality curl(f) = [0,0, 2d-curl(f)]^T)
         }
         if (this.inputDimensions == 3) { // 3d case R^3 -> R^3
-            // do things
+
+            const jacobian = this.getJacobianAt(v);
+
+            const rWRTy = jacobian.get(2, 1); // index 2 is (row) R index 1 is (column) Y (f(x,y,z) = [P(x,y,z), Q(x,y,z), R(x,y,z)]^T)
+            const qWRTz = jacobian.get(1, 2);
+            const resultX = rWRTy - qWRTz;
+
+            const rWRTx = jacobian.get(2, 0);
+            const pWRTz = jacobian.get(0, 2);
+            const resultY = pWRTz - rWRTx;
+
+            const qWRTx = jacobian.get(1, 0);
+            const pWRTy = jacobian.get(0, 1);
+            const resultZ = qWRTx - pWRTy;
+
+            return new Vector([
+                resultX,
+                resultY,
+                resultZ
+            ]); // test this
         }
         if (this.inputDimensions > 3) {
             // do things
