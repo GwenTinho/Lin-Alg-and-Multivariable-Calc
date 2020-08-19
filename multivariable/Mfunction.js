@@ -3,9 +3,8 @@ import Matrix from "../Matrix";
 
 class MFunction {
     constructor(inputDimensions, outputDimensions, vectorfn) { // parametric as in R -> R^n
-        this.isOutputSet = false;
-        this.inputDimensions = inputDimensions;
-        this.outputDimensions;
+        this.inputDimensions = inputDimensions >= 1 ? inputDimensions : 1;
+        this.outputDimensions = outputDimensions >= 1 ? outputDimensions : 1;
         this.isParamFn = inputDimensions === 1;
         this.calc;
         this.isJacobianSet = false;
@@ -13,22 +12,18 @@ class MFunction {
         this.getGradientAt;
         this.isHessianSet = false;
         this.getHessianAt;
-        this.isScalarValued;
+        this.isScalarValued = this.outputDimensions === 1;
+        this.isVectorField = this.outputDimensions === this.inputDimensions;
         this.setOutput(vectorfn, outputDimensions);
     }
 
-    setOutput(vectorfn, outputDimensions) { // instead of functionarray use a function that simply takes in one vector and outputs another vector or scalar depending on the type
-        this.outputDimensions = outputDimensions;
-        if (this.outputDimensions === 1) {
-            this.isScalarValued = true;
-        }
+    setOutput(vectorfn) { // instead of functionarray use a function that simply takes in one vector and outputs another vector or scalar depending on the type
         this.calc = vectorfn;
-        this.isOutputSet = true;
         return this;
     }
 
     partialDerivative(index) { // R^n -> R^m
-        if (!this.isOutputSet || this.isParamFn) return new Error("invalid structure for partial deriv");
+        if (this.isParamFn) return new Error("invalid structure for partial deriv");
         return t => { // t is a vector
             const h = 1e-10;
             let s = t.copyInstance();
@@ -37,23 +32,19 @@ class MFunction {
     }
 
     initJacobian() {
-        if (!this.isOutputSet) {
-            console.log(new Error("invalid structure for Jacobian"));
+        if (this.isParamFn) {
+            this.getJacobianAt = t => MFunction.paramDeriv(t, this.calc);
         } else {
-            if (this.isParamFn) {
-                this.getJacobianAt = t => MFunction.paramDeriv(t, this.calc);
-            } else {
-                this.getJacobianAt = v => {
-                    let vectors = [];
-                    for (let index = 0; index < this.inputDimensions; index++) {
-                        vectors.push(this.partialDerivative(index)(v));
-                    }
-                    return new Matrix(vectors);
+            this.getJacobianAt = v => {
+                let vectors = [];
+                for (let index = 0; index < this.inputDimensions; index++) {
+                    vectors.push(this.partialDerivative(index)(v));
                 }
+                return new Matrix(vectors);
             }
-            if (this.isScalarValued) this.getGradientAt = v => this.getJacobianAt(v).T().getCol(0);
-            this.isJacobianSet = true;
         }
+        if (this.isScalarValued) this.getGradientAt = v => this.getJacobianAt(v).T().getCol(0);
+        this.isJacobianSet = true;
     }
 
     directionalDerivative(v, x) { // x along v
@@ -61,7 +52,7 @@ class MFunction {
     }
 
     getCurvatureAt(t) {
-        if (!this.isParamFn || !this.isOutputSet) return new Error("invalid structure for curvature");
+        if (!this.isParamFn) return new Error("invalid structure for curvature");
 
         const dS = MFunction.paramDeriv(t, this.calc); // 1st deriv
 
@@ -77,35 +68,35 @@ class MFunction {
     }
 
     getUnitTangent(t) {
-        if (!this.isParamFn || !this.isOutputSet) return new Error("invalid structure for unit tan");
+        if (!this.isParamFn) return new Error("invalid structure for unit tan");
 
         return MFunction.paramDeriv(t, this.calc).asUnit();
     }
 
     getPrincipleUnitNormal(t) {
-        if (!this.isParamFn || !this.isOutputSet) return new Error("invalid structure for unit norm");
+        if (!this.isParamFn) return new Error("invalid structure for unit norm");
 
         return MFunction.paramDeriv(t, this.getUnitTangent).asUnit();
     }
 
     getDivergence(t) {
-        if (!this.isOutputSet) return new Error("invalid structure for divergence");
+        if (!this.isVectorField) return new Error("invalid structure for Divergence (not a vector field)");
         if (!this.isJacobianSet) this.initJacobian();
 
         return this.getJacobianAt(t).trace();
     }
 
     getLaplacian(t) {
-        if (!this.isOutputSet) return new Error("invalid structure for laplacian");
         if (!this.isScalarValued) return new Error("invalid structure for laplacian (not scalar valued)");
 
         let laplacianGenerator = new MFunction(this.inputDimensions, this.inputDimensions, this.getGradientAt);
 
-        return laplacianGenerator.getDivergence(t); // test this too
+        return laplacianGenerator.getDivergence(t);
+
+        // fun fact: laplacian = trace of Hessian, which would be slower than out code here but still
     }
 
     initHessian() {
-        if (!this.isOutputSet) return new Error("invalid structure for Hessian");
         if (!this.isScalarValued) return new Error("invalid structure for Hessian (not scalar valued)");
 
         if (!this.isJacobianSet) this.initJacobian();
@@ -123,6 +114,13 @@ class MFunction {
     }
 
     getCurl() {
+        if (!this.isVectorField) return new Error("invalid structure for Curl (not a vector field)");
+        if (this.inputDimensions == 2) { // 2d case
+            // do things
+        }
+        if (this.inputDimensions == 3) { // 3d case
+            // do things
+        }
         // implement this for 2d and 3d, then figure out that weird generalisation
     }
 
