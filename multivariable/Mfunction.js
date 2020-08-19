@@ -23,14 +23,19 @@ class MFunction {
 
     setOutput(vectorfn) { // instead of functionarray use a function that simply takes in one vector and outputs another vector or scalar depending on the type
         this.calc = vectorfn;
-        return this;
     }
 
     partialDerivative(index) { // R^n -> R^m // returns a function that returns a vector with all the derivatives with respect to the variable at index
         if (this.isParamFn) return new Error("invalid structure for partial deriv");
         return v => { // v is a vector
             const h = 1e-10;
+
             let u = v.copyInstance();
+
+            // technicality: scalar has to be used as 1x1 vector to allow for matrix operators
+
+            if (this.isScalarValued) return new Vector([(this.calc(v.addToRow(index, h)) - this.calc(u.addToRow(index, -h))) * (0.5 / h)]);
+
             return this.calc(v.addToRow(index, h)).sub(this.calc(u.addToRow(index, -h))).mult(0.5 / h);
         }
     }
@@ -55,7 +60,7 @@ class MFunction {
         return this.getGradientAt(x).dot(v);
     }
 
-    getCurvatureAt(t) {
+    getCurvatureAt(t) { // R -> R
         if (!this.isParamFn) return new Error("invalid structure for curvature");
 
         const dS = MFunction.paramDeriv(t, this.calc); // 1st deriv
@@ -83,21 +88,20 @@ class MFunction {
         return MFunction.paramDeriv(t, this.getUnitTangent).asUnit();
     }
 
-    getDivergence(t) {
+    getDivergence(v) { // R^n -> R
         if (!this.isVectorField) return new Error("invalid structure for Divergence (not a vector field)");
 
-        return this.getJacobianAt(t).trace();
+        return this.getJacobianAt(v).trace();
     }
 
-    getLaplacian(t) {
+    getLaplacian(v) { // R^n -> R
         if (!this.isScalarValued) return new Error("invalid structure for laplacian (not scalar valued)");
 
-        let laplacianGenerator = new MFunction(this.inputDimensions, this.inputDimensions, this.getGradientAt);
+        return this.getHessianAt(v).trace();
 
-        return laplacianGenerator.getDivergence(t); // tr(J(grad(f)))
+        // why it works: laplacian f = div(grad f) = trace(J(grad f)) = trace(H(f))
 
-        // needs testing
-        // fun fact: laplacian = trace of Hessian, which would be slower than out code here but still
+        // implement proper nth derivative algorithms
     }
 
     initHessian() {
@@ -105,7 +109,9 @@ class MFunction {
 
         let hessianGenerator = new MFunction(this.inputDimensions, this.inputDimensions, this.getGradientAt);
 
-        this.getHessianAt = hessianGenerator.getJacobianAt;
+        this.getHessianAt = hessianGenerator.getJacobianAt; // needs testing
+
+        // implement proper nth derivative algorithms
     }
 
     secondDeriveTest() {

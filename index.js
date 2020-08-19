@@ -8,15 +8,10 @@ import bernoulli from "./bernoulli/bernoulli";
 import Mfunction from "./multivariable/Mfunction";
 
 
-let f = new Mfunction(3, 3,
-    v => new Vector(
-        [
-            v.get(0) * v.get(1),
-            Math.cos(v.get(2)),
-            v.get(2) ** 2 + v.get(1)
-        ])
+let f = new Mfunction(2, 1,
+    v => 3 + Math.cos(v.get(0) / 2) * Math.sin(v.get(1) / 2)
 );
 
-console.log(f.getCurl(new Vector([3, 10, 0])));
+console.log(f.getHessianAt(new Vector([3.14, 3.14])).toString());
 
-// would expect (1,0,-3) --> works fine
+// would expect -0.125 --> works fine
