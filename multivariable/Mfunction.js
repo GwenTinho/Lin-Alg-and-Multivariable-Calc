@@ -143,10 +143,10 @@ class MFunction {
                 resultX,
                 resultY,
                 resultZ
-            ]); // test this
+            ]);
         }
         if (this.inputDimensions > 3) {
-            // do things
+            return new Error("I don't understand the generalizations yet");
         }
     }
 
