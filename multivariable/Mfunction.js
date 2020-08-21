@@ -32,6 +32,7 @@ class MFunction {
         const h = 1e-10;
 
         const u = v.copyInstance();
+
         const w = v.copyInstance();
 
         // technicality: scalar has to be used as 1x1 vector to allow for matrix operators
@@ -86,13 +87,17 @@ class MFunction {
             this.getJacobianAt = v => {
                 let vectors = [];
                 for (let index = 0; index < this.inputDimensions; index++) {
-                    vectors.push(this.partialDerivative(index)(v));
+                    vectors.push(this.partialDerivative(index, v));
                 }
                 return new Matrix(vectors);
             }
         }
         if (this.scalarValued) this.getGradientAt = v => this.getJacobianAt(v).T().getCol(0);
         this.jacobianSet = true;
+    }
+
+    getJacobianDetAt(v) {
+        return this.getJacobianAt(v).initValues().det;
     }
 
     directionalDerivative(v, x) { // x along v
@@ -177,23 +182,31 @@ class MFunction {
         this.hessianSet = true;
     }
 
+    isCritical(v) {
+        if (!this.scalarValued) return new Error("invalid structure for critical points (not scalar valued)");
+
+        const err = 1e-8;
+
+        return this.getGradientAt(v).getNormSquared() < err;
+    }
+
     hasMinimumAt(v) {
         if (!this.scalarValued) return new Error("invalid structure for minimum using hessian (not scalar valued)");
 
-        return this.getHessianAt(v).isPositiveDefinite();
+        return this.getHessianAt(v).isPositiveDefinite() && this.isCritical(v);
     }
 
     hasMaximumAt(v) {
         if (!this.scalarValued) return new Error("invalid structure for maximum using hessian (not scalar valued)");
 
-        return this.getHessianAt(v).isNegativeDefinite();
+        return this.getHessianAt(v).isNegativeDefinite() && this.isCritical(v);
     }
 
     hasSaddleAt(v) {
-            if (!this.scalarValued) return new Error("invalid structure for saddle using hessian (not scalar valued)");
+        if (!this.scalarValued) return new Error("invalid structure for saddle using hessian (not scalar valued)");
 
-            return this.getHessianAt(v).isNonDefinite();
-        } // seems to work
+        return this.getHessianAt(v).isNonDefinite() && this.isCritical(v);
+    }
 
     getNthPartialDeriv() {
         // some day ...

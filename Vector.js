@@ -124,6 +124,10 @@ class Vector {
     static nullVector() {
         return new Vector([]);
     }
+
+    static zero(n) {
+        return new Vector(new Array(n).fill(0));
+    }
 }
 
 export default Vector;
