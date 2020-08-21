@@ -4,12 +4,16 @@ import rootProduct from "./helperFunctions/rootProduct";
 
 class Matrix {
     constructor(vectors) {
-        this.vectors = vectors; // matrix as array of column vectors
+        this.errors = [];
+
+        if (vectors.length !== 0) this.vectors = vectors; // matrix as array of column vectors
+        else this.errors.push(new Error("empty vectors array"));
 
         this.det;
         this.inverse;
         this.rref;
-        this.isOrthogonal;
+        this.orthogonal;
+        this.symmetric;
     }
 
     multByVector(vector) {
@@ -27,6 +31,9 @@ class Matrix {
     }
 
     initValues() {
+
+        this.symmetric = this.isEqual(this.T());
+
         const dims = this.getDimensions();
         const rows = dims[0];
         const columns = dims[1];
@@ -87,9 +94,78 @@ class Matrix {
 
         this.rref = rref;
         this.det = accumulator;
-        this.inverse = (this.det == 0) ? Matrix.getEmptyMatrix() : iden;
-        this.isOrthogonal = this.isEqual(this.inverse.T());
+        this.inverse = (this.det === 0) ? Matrix.getEmptyMatrix() : iden;
+        this.orthogonal = (this.det === 0) ? false : this.isEqual(this.inverse.T());
         return this;
+    }
+
+    isOrthogonal() {
+        return this.orthogonal;
+    }
+
+    isSymmetric() {
+        return this.symmetric;
+    }
+
+    isPositiveDefinite() {
+        const eigenV = this.getEigenValues();
+
+        for (let index = 0; index < eigenV.length; index++) {
+            if (eigenV[index] <= 0) return false;
+        }
+
+        return true;
+    }
+
+    isPositiveSemiDefinite() {
+        const eigenV = this.getEigenValues();
+
+        for (let index = 0; index < eigenV.length; index++) {
+            if (eigenV[index] < 0) return false;
+        }
+
+        return true;
+    }
+
+    isNegativeDefinite() {
+        const eigenV = this.getEigenValues();
+
+        for (let index = 0; index < eigenV.length; index++) {
+            if (eigenV[index] >= 0) return false;
+        }
+
+        return true;
+    }
+
+    isNegativeSemiDefinite() {
+        const eigenV = this.getEigenValues();
+
+        for (let index = 0; index < eigenV.length; index++) {
+            if (eigenV[index] > 0) return false;
+        }
+
+        return true;
+    }
+
+    isNonDefinite() { // one of each (atleast 1 neg and 1 pos) (needed to decide if it has a saddle point)
+        const eigenV = this.getEigenValues();
+        let count = 0;
+
+        for (let index = 0; index < eigenV.length; index++) {
+            if (eigenV[index] > 0) {
+                count++;
+                break;
+            }
+        }
+
+        for (let index = 0; index < eigenV.length; index++) {
+            if (eigenV[index] < 0) {
+                count++;
+                break;
+            }
+        }
+
+        return count === 2;
     }
 
     get(row, column) {
@@ -151,12 +227,13 @@ class Matrix {
 
     T() {
         let matrix = this.copyInstance();
+        let dims = matrix.getDimensions();
         let rowVectors = [];
 
-        for (let i = 0; i < matrix.vectors[0].getDimension(); i++) { // rows
+        for (let i = 0; i < dims[0]; i++) { // rows
             let coords = [];
 
-            for (let j = 0; j < matrix.vectors.length; j++) { // columns
+            for (let j = 0; j < dims[1]; j++) { // columns
                 coords.push(matrix.get(i, j));
             }
             rowVectors.push(new Vector(coords));
@@ -267,6 +344,7 @@ class Matrix {
         let eigenValues = []; // divide the characteristic poly fn through (lambda - previous eigenvalues) to remove those solutions.
 
         // breaks for complex solutions
+        // next implement complex numbers
 
         for (let index = 0; index < n; index++) {
 

@@ -7,15 +7,16 @@ class MFunction {
     constructor(inputDimensions, outputDimensions, vectorfn) {
         this.inputDimensions = inputDimensions >= 1 ? inputDimensions : 1;
         this.outputDimensions = outputDimensions >= 1 ? outputDimensions : 1;
-        this.isParamFn = inputDimensions === 1; // parametric as in R -> R^n
+        this.paramFn = inputDimensions === 1; // parametric as in R -> R^n
         this.calc;
-        this.isJacobianSet = false;
+        this.jacobianSet = false;
         this.getJacobianAt;
         this.getGradientAt;
-        this.isHessianSet = false;
+        this.hessianSet = false;
         this.getHessianAt;
-        this.isScalarValued = this.outputDimensions === 1; // scalar as in R^n -> R
-        this.isVectorField = this.outputDimensions === this.inputDimensions; // vector field as in R^n -> R^n
+        this.harmonic;
+        this.scalarValued = this.outputDimensions === 1; // scalar as in R^n -> R
+        this.vectorField = this.outputDimensions === this.inputDimensions; // vector field as in R^n -> R^n
         this.setOutput(vectorfn, outputDimensions);
         this.initJacobian();
         this.initHessian();
@@ -25,55 +26,61 @@ class MFunction {
         this.calc = vectorfn;
     }
 
-    partialDerivative(index) { // R^n -> R^m // returns a function that returns a vector with all the derivatives with respect to the variable at index
-        if (this.isParamFn) return new Error("invalid structure for partial deriv");
-        return v => { // v is a vector
-            const h = 1e-10;
+    partialDerivative(index, v) { // R^n -> R^m // returns a function that returns a vector with all the derivatives with respect to the variable at index
+        if (this.paramFn) return new Error("invalid structure for partial deriv");
+        // v is a vector
+        const h = 1e-10;
 
-            let u = v.copyInstance();
+        const u = v.copyInstance();
+        const w = v.copyInstance();
 
-            // technicality: scalar has to be used as 1x1 vector to allow for matrix operators
+        // technicality: scalar has to be used as 1x1 vector to allow for matrix operators
 
-            if (this.isScalarValued) return new Vector([(this.calc(v.addToRow(index, h)) - this.calc(u.addToRow(index, -h))) * (0.5 / h)]);
+        if (this.scalarValued) return new Vector([(this.calc(w.addToRow(index, h)) - this.calc(u.addToRow(index, -h))) * (0.5 / h)]);
 
-            return this.calc(v.addToRow(index, h)).sub(this.calc(u.addToRow(index, -h))).mult(0.5 / h);
-        }
+        return this.calc(w.addToRow(index, h)).sub(this.calc(u.addToRow(index, -h))).mult(0.5 / h);
+
     }
 
-    secondPartialDerivative(index1, index2) {
-        if (this.isParamFn) return new Error("invalid structure for scnd partial deriv");
+    secondPartialDerivative(index1, index2, v) {
+        if (this.paramFn) return new Error("invalid structure for scnd partial deriv");
 
-        return v => { // v is a vector
-            const h = 1e-5;
+        // v is a vector
+        const h = 9e-6;
 
-            let u = v.copyInstance();
-            let w = v.copyInstance();
-            let t = v.copyInstance();
+        const s = v.copyInstance();
+        const t = v.copyInstance();
+        const u = v.copyInstance();
+        const w = v.copyInstance();
 
-            // technicality: scalar has to be used as 1x1 vector to allow for matrix operators
+        // technicality: scalar has to be used as 1x1 vector to allow for matrix operators
 
-            const multiplier = 0.25 / (h ** 2); // uses midpoint for more accuracy // also need to add this to the other derivation algs
+        const multiplier = 0.25 / h; // uses midpoint for more accuracy // also need to add this to the other derivation algs
 
-            const v4 = t.addToRow(index1, -h).addToRow(index2, h);
-            const v3 = w.addToRow(index1, h).addToRow(index2, -h);
-            const v2 = v.addToRow(index1, h).addToRow(index2, h);
-            const v1 = u.addToRow(index1, -h).addToRow(index2, -h);
 
-            if (this.isScalarValued) {
-                const homoVScalar = this.calc(v1) + this.calc(v2);
-                const heterVScalar = this.calc(v3) + this.calc(v4);
-                return new Vector([(homoVScalar - heterVScalar) * multiplier]);
-            }
+        const v1 = index1 === index2 ? s.addToRow(index1, 2 * h) : s.addToRow(index1, h).addToRow(index2, h);
+        const v2 = index1 === index2 ? t.addToRow(index1, -2 * h) : t.addToRow(index1, -h).addToRow(index2, -h);
+        const v3 = index1 === index2 ? u : u.addToRow(index1, -h).addToRow(index2, h);
+        const v4 = index1 === index2 ? w : w.addToRow(index1, h).addToRow(index2, -h);
 
-            const homoVScalar = this.calc(v1).add(this.calc(v2));
-            const heterVScalar = this.calc(v3).add(this.calc(v4));
-            return homoVScalar.sub(heterVScalar).mult(multiplier);
+        if (this.scalarValued) {
+            const homoVScalar = this.calc(v1) + this.calc(v2);
+            const heterVScalar = this.calc(v3) + this.calc(v4);
 
+            return new Vector([((homoVScalar - heterVScalar) * multiplier) / h]); // divide by h in 2 different steps to avoid floating point errors
         }
+
+        const homoVScalar = this.calc(v1).add(this.calc(v2));
+        const heterVScalar = this.calc(v3).add(this.calc(v4));
+        return homoVScalar.sub(heterVScalar).mult(multiplier).mult(1 / h);
+
+        // this is really bad and converges only for small values if used with functions like e^x
+
     }
+
 
     initJacobian() {
-        if (this.isParamFn) {
+        if (this.paramFn) {
             this.getJacobianAt = t => MFunction.paramDeriv(t, this.calc);
         } else {
             this.getJacobianAt = v => {
@@ -84,8 +91,8 @@ class MFunction {
                 return new Matrix(vectors);
             }
         }
-        if (this.isScalarValued) this.getGradientAt = v => this.getJacobianAt(v).T().getCol(0);
-        this.isJacobianSet = true;
+        if (this.scalarValued) this.getGradientAt = v => this.getJacobianAt(v).T().getCol(0);
+        this.jacobianSet = true;
     }
 
     directionalDerivative(v, x) { // x along v
@@ -93,7 +100,7 @@ class MFunction {
     }
 
     getCurvatureAt(t) { // R -> R
-        if (!this.isParamFn) return new Error("invalid structure for curvature");
+        if (!this.paramFn) return new Error("invalid structure for curvature");
 
         const dS = MFunction.paramDeriv(t, this.calc); // 1st deriv
 
@@ -109,33 +116,50 @@ class MFunction {
     }
 
     getUnitTangent(t) {
-        if (!this.isParamFn) return new Error("invalid structure for unit tan");
+        if (!this.paramFn) return new Error("invalid structure for unit tan");
 
         return MFunction.paramDeriv(t, this.calc).asUnit();
     }
 
     getPrincipleUnitNormal(t) {
-        if (!this.isParamFn) return new Error("invalid structure for unit norm");
+        if (!this.paramFn) return new Error("invalid structure for unit norm");
 
         return MFunction.paramDeriv(t, this.getUnitTangent).asUnit();
     }
 
     getDivergence(v) { // R^n -> R
-        if (!this.isVectorField) return new Error("invalid structure for Divergence (not a vector field)");
+        if (!this.vectorField) return new Error("invalid structure for Divergence (not a vector field)");
 
         return this.getJacobianAt(v).trace();
     }
 
     getLaplacian(v) { // R^n -> R
-        if (!this.isScalarValued) return new Error("invalid structure for laplacian (not scalar valued)");
+        if (!this.scalarValued) return new Error("invalid structure for laplacian (not scalar valued)");
 
         return this.getHessianAt(v).trace();
 
         // why it works: laplacian f = div(grad f) = trace(J(grad f)) = trace(H(f))
+        // but the derivative algorithms need to improve a lot for decent accuracy (rn its pretty bad)
+    }
+
+    isHarmonic(testVectors) {
+        if (!this.scalarValued) return new Error("invalid structure for harmonic");
+
+        const err = 1e-8;
+
+        for (let index = 0; index < testVectors.length; index++) {
+            if (this.getLaplacian(testVectors[index]) ** 2 >= err) {
+                this.harmonic = false;
+                return false;
+            }
+        }
+
+        this.harmonic = true;
+        return true; // kinda shit cuz the laplacian is inaccurate as fuck
     }
 
     initHessian() {
-        if (!this.isScalarValued) return new Error("invalid structure for Hessian (not scalar valued)");
+        if (!this.scalarValued) return new Error("invalid structure for Hessian (not scalar valued)");
 
         this.getHessianAt = v => {
             let vectors = [];
@@ -143,26 +167,40 @@ class MFunction {
                 let coords = [];
 
                 for (let row = 0; row < this.inputDimensions; row++) {
-                    coords.push(this.secondPartialDerivative(row, col)(v).get(0));
+                    coords.push(this.secondPartialDerivative(row, col, v).get(0));
                 }
                 vectors.push(new Vector(coords));
             }
 
             return new Matrix(vectors);
         }
-        this.isHessianSet = true;
+        this.hessianSet = true;
     }
 
-    secondDeriveTest() {
-        // research this and make it work
+    hasMinimumAt(v) {
+        if (!this.scalarValued) return new Error("invalid structure for minimum using hessian (not scalar valued)");
+
+        return this.getHessianAt(v).isPositiveDefinite();
     }
+
+    hasMaximumAt(v) {
+        if (!this.scalarValued) return new Error("invalid structure for maximum using hessian (not scalar valued)");
+
+        return this.getHessianAt(v).isNegativeDefinite();
+    }
+
+    hasSaddleAt(v) {
+            if (!this.scalarValued) return new Error("invalid structure for saddle using hessian (not scalar valued)");
+
+            return this.getHessianAt(v).isNonDefinite();
+        } // seems to work
 
     getNthPartialDeriv() {
         // some day ...
     }
 
     getCurl(v) {
-        if (!this.isVectorField) return new Error("invalid structure for Curl (not a vector field)");
+        if (!this.vectorField) return new Error("invalid structure for Curl (not a vector field)");
         if (this.inputDimensions == 2) { // 2d case R^2 -> R (actually still R^3 to R^3 but a bit compressed)
 
             // WRT means with respect to, i.e. partialQ / partialX

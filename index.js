@@ -9,9 +9,7 @@ import Mfunction from "./multivariable/Mfunction";
 
 
 let f = new Mfunction(2, 1,
-    v => 3 + Math.cos(v.get(0) / 2) * Math.sin(v.get(1) / 2)
+    v => v.getNormSquared()
 );
 
-console.log(f.getLaplacian(new Vector([Math.PI / 2, Math.PI / 2])));
-
-// would expect -0.125 --> works fine
+console.log(f.hasMinimumAt(new Vector([0, 0])));
