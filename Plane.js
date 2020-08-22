@@ -9,7 +9,8 @@ class Plane {
         this.vector2 = v2;
         this.point = point;
 
-        this.isValidPlane = this.vector1.isAligned(this.vector2); // checks if the vectors of the plane are aligned
+        this.isValidPlane = this.vector1.isAligned(this.vector2) && this.v1.getDimension() === this.v2.getDimension() && this.v1.getDimension() === 3;
+        // checks if the vectors of the plane are aligned and fit the correct dimensions
     }
 
     isPointInPlane(point) {
@@ -32,18 +33,15 @@ class Plane {
         if (!this.isValidPlane) return Point([NaN]); // obviously the error behaviour can be tweaked, this was just the most useful to my applications
 
         const deltaY = -Matrix.fastDet2d(
-            [this.vector1.coordinates[0], this.vector1.coordinates[2]],
-            [this.vector2.coordinates[0], this.vector2.coordinates[2]]
+            [this.vector1.coordinates[0], this.vector1.coordinates[2]], [this.vector2.coordinates[0], this.vector2.coordinates[2]]
         );
 
         const deltaX = Matrix.fastDet2d(
-            [this.vector1.coordinates[1], this.vector1.coordinates[2]],
-            [this.vector2.coordinates[1], this.vector2.coordinates[2]]
+            [this.vector1.coordinates[1], this.vector1.coordinates[2]], [this.vector2.coordinates[1], this.vector2.coordinates[2]]
         );
 
         const deltaZ = Matrix.fastDet2d(
-            [this.vector1.coordinates[0], this.vector1.coordinates[1]],
-            [this.vector2.coordinates[0], this.vector2.coordinates[1]]
+            [this.vector1.coordinates[0], this.vector1.coordinates[1]], [this.vector2.coordinates[0], this.vector2.coordinates[1]]
         );
 
         const tNomX = deltaX * (this.point.coordinates[0] - line.point.coordinates[0]);

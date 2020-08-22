@@ -26,6 +26,10 @@ class Matrix {
         return new Vector(coords);
     }
 
+    wrapToScalar(vector) { // (x^T)Ax = x.Ax = Ax.x
+        return this.multByVector(vector).dot(vector);
+    }
+
     multByReal(number) {
         return new Matrix(this.copyInstance().vectors.map(vector => vector.mult(number)));
     }

@@ -1,5 +1,7 @@
 import Vector from "../Vector";
 import Matrix from "../Matrix";
+import Plane from "../Plane";
+import Point from "../Point";
 
 // a class that describes a multivariable function R^n -> R^m and implements a bunch of operators for that function
 
@@ -248,6 +250,36 @@ class MFunction {
         if (this.inputDimensions > 3) {
             return new Error("I don't understand the generalizations yet");
         }
+    }
+
+    getLocalLinearization(v) { // returns a new functions that gives the local linearisation around that point P(v)
+        if (!this.scalarValued) return new Error("invalid structure for LL (not scalar valued)");
+
+        const fAtP = this.calc(v);
+        const gradAtP = this.getGradientAt(v);
+
+        return new MFunction(this.inputDimensions, 1, u => fAtP + gradAtP.dot(u.copyInstance().sub(v))); // maybe make functions immutable in general ...
+        // needs testing
+    }
+
+    getQuadraticApproximation(v) { // returns a new functions that gives the quadratic approximation around that point P(v)
+        if (!this.scalarValued) return new Error("invalid structure for QA (not scalar valued)");
+
+        const hessianAtP = this.getHessianAt(v);
+
+        return new MFunction(this.inputDimensions, 1, u => this.getLocalLinearization(v).calc(u) + 0.5 * hessianAtP.wrapToScalar(u.copyInstance().sub(v)));
+        // needs testing
+    }
+
+    getTangentPlane(v) { // v is a 2d vector
+        if (this.inputDimensions !== 2 || !this.scalarValued) return new Error("invalid structure for Tangent (not scalar valued or wrong inputdimensions)");
+
+        const gradient = this.getGradientAt(v);
+        const d1 = new Vector([1, 0, gradient.get(0)]);
+        const d2 = new Vector([0, 1, gradient.get(1)]);
+        const point = new Point([v.get(0), v.get(1), this.calc(v)]);
+
+        return new Plane(d1, d2, point); // needs testing
     }
 
     static paramDeriv(t, paramFn) { // R -> R^n // dont use repeated
