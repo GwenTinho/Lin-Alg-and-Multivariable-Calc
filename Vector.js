@@ -50,7 +50,7 @@ class Vector {
     }
 
     mult(number) {
-        this.coordinates = this.coordinates.map(coord => coord * number);
+        this.coordinates = this.coordinates.map(coord => coord * number); // check where this mess appears and think how to fix it to be immutable
         return this;
     }
 
