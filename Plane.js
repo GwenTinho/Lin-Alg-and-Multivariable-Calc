@@ -9,7 +9,7 @@ class Plane {
         this.vector2 = v2;
         this.point = point;
 
-        this.isValidPlane = this.vector1.isAligned(this.vector2) && this.v1.getDimension() === this.v2.getDimension() && this.v1.getDimension() === 3;
+        this.isValidPlane = this.vector1.isAligned(this.vector2) && this.vector1.getDimension() === this.vector2.getDimension() && this.vector1.getDimension() === 3;
         // checks if the vectors of the plane are aligned and fit the correct dimensions
     }
 

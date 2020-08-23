@@ -8,11 +8,16 @@ import bernoulli from "./bernoulli/bernoulli";
 import Mfunction from "./multivariable/Mfunction";
 
 
-let f = new Mfunction(2, 2,
-    v => new Vector([
-        v.get(0) + Math.sin(v.get(1)),
-        v.get(1) + Math.sin(v.get(0))
-    ])
+let f = new Mfunction(2, 1,
+    v => Math.exp(v.get(0) / 2) * Math.sin(v.get(1))
 );
 
-console.log(f.getJacobianDetAt(new Vector([0, 1])));
+let linAppr = f.getLocalLinearization(new Vector([0, Math.PI / 2]));
+
+console.log(linAppr.calc(new Vector([0, Math.PI / 2])));
+
+console.log(f.calc(new Vector([0, Math.PI / 2])));
+
+let tanPlane = f.getTangentPlane(new Vector([0, Math.PI / 2]));
+
+console.log(tanPlane);
