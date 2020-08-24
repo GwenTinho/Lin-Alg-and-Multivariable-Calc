@@ -14,6 +14,7 @@ class Matrix {
         this.rref;
         this.orthogonal;
         this.symmetric;
+        this.diagonal = null;
     }
 
     multByVector(vector) {
@@ -100,6 +101,7 @@ class Matrix {
         this.det = accumulator;
         this.inverse = (this.det === 0) ? Matrix.getEmptyMatrix() : iden;
         this.orthogonal = (this.det === 0) ? false : this.isEqual(this.inverse.T());
+
         return this;
     }
 
@@ -109,6 +111,24 @@ class Matrix {
 
     isSymmetric() {
         return this.symmetric;
+    }
+
+    isDiagonal() {
+        if (!this.isSquare()) return false;
+        if (typeof this.diagonal === "boolean") return this.diagonal;
+
+        const size = this.getDimensions()[0];
+
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                if (i !== j && this.get(i, j) !== 0) {
+                    this.diagonal = false;
+                    return false;
+                }
+            }
+        }
+        this.diagonal = true;
+        return true;
     }
 
     isPositiveDefinite() {
@@ -151,7 +171,7 @@ class Matrix {
         return true;
     }
 
-    isNonDefinite() { // one of each (atleast 1 neg and 1 pos) (needed to decide if it has a saddle point)
+    isNonDefinite() { // one of each (atleast 1 neg and 1 pos) (needed to decide if function has a saddle point)
         const eigenV = this.getEigenValues();
         let count = 0;
 
@@ -342,6 +362,7 @@ class Matrix {
     getEigenValues() {
         if (!this.isSquare()) return [];
 
+
         const n = this.getDimensions()[0];
         const inital = 2;
 
@@ -349,6 +370,14 @@ class Matrix {
 
         // breaks for complex solutions
         // next implement complex numbers
+        // sometimes also breaks for other number idk really
+
+        if (this.isDiagonal()) {
+            for (let index = 0; index < n; index++) {
+                eigenValues.push(this.get(index, index));
+            }
+            return eigenValues;
+        }
 
         for (let index = 0; index < n; index++) {
 

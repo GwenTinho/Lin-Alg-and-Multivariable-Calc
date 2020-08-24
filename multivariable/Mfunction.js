@@ -184,6 +184,8 @@ class MFunction {
         this.hessianSet = true;
     }
 
+    //saddle point maximum and minimum will not work unless i implement the eigenvalue algorithm with complex numbers instead to make it work
+
     isCritical(v) {
         if (!this.scalarValued) return new Error("invalid structure for critical points (not scalar valued)");
 
@@ -207,7 +209,9 @@ class MFunction {
     hasSaddleAt(v) {
         if (!this.scalarValued) return new Error("invalid structure for saddle using hessian (not scalar valued)");
 
-        return this.getHessianAt(v).isNonDefinite() && this.isCritical(v);
+        let l = this.getHessianAt(v);
+
+        return l.isNonDefinite() && this.isCritical(v);
     }
 
     getNthPartialDeriv() {
