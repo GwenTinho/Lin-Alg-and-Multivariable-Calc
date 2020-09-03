@@ -19,12 +19,12 @@ class MFunction {
         this.harmonic;
         this.scalarValued = this.outputDimensions === 1; // scalar as in R^n -> R
         this.vectorField = this.outputDimensions === this.inputDimensions; // vector field as in R^n -> R^n
-        this.setOutput(vectorfn, outputDimensions);
+        this.setOutputFunction(vectorfn, outputDimensions);
         this.initJacobian();
         this.initHessian();
     }
 
-    setOutput(vectorfn) { // instead of functionarray use a function that simply takes in one vector and outputs another vector or scalar depending on the type
+    setOutputFunction(vectorfn) {
         this.calc = vectorfn;
     }
 
@@ -184,7 +184,10 @@ class MFunction {
         this.hessianSet = true;
     }
 
-    //saddle point maximum and minimum will not work unless i implement the eigenvalue algorithm with complex numbers instead to make it work
+    // my naive eigenvalue algorithm that only allows for real valued solution to the characteristic polynomial
+    // still allows us to get all the eigenvalues of a real symmetric matrix, so it should work just fine
+
+    // technically i would also have to check wheter the hessian is invertible but ill keep that for another time i think
 
     isCritical(v) {
         if (!this.scalarValued) return new Error("invalid structure for critical points (not scalar valued)");

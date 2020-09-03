@@ -359,9 +359,8 @@ class Matrix {
 
 
 
-    getEigenValues() {
+    getEigenValues() { // needs a lot more testing 
         if (!this.isSquare()) return [];
-
 
         const n = this.getDimensions()[0];
         const inital = 2;
