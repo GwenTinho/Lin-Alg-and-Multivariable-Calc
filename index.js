@@ -23,4 +23,5 @@ console.log(M1.getEigenValues());
 note to self:
 test eigenvalue alg to avoid weird edge cases
 // more testing pls
+also do testing for new triangularity checks
 */

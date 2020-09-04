@@ -15,6 +15,9 @@ class Matrix {
         this.orthogonal;
         this.symmetric;
         this.diagonal = null;
+        this.upperTriangular = null;
+        this.lowerTriangular = null;
+        this.triangular = null;
     }
 
     multByVector(vector) {
@@ -113,6 +116,50 @@ class Matrix {
 
     isSymmetric() {
         return this.symmetric;
+    }
+
+    isUpperTriangular() {
+        if (!this.isSquare()) return false;
+        if (typeof this.upperTriangular === "boolean") return this.upperTriangular;
+
+        const size = this.getDimensions()[0];
+
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                if (i > j && this.get(i, j) !== 0) {
+                    this.upperTriangular = false;
+                    return false;
+                }
+            }
+        }
+        this.upperTriangular = true;
+        return true;
+    }
+
+    isLowerTriangular() {
+        if (!this.isSquare()) return false;
+        if (typeof this.lowerTriangular === "boolean") return this.lowerTriangular;
+
+        const size = this.getDimensions()[0];
+
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                if (i < j && this.get(i, j) !== 0) {
+                    this.lowerTriangular = false;
+                    return false;
+                }
+            }
+        }
+        this.lowerTriangular = true;
+        return true;
+    }
+
+    isTriangular() {
+        if (!this.isSquare()) return false;
+        if (typeof this.triangular === "boolean") return this.triangular;
+
+        this.triangular = this.isLowerTriangular() || this.isUpperTriangular();
+        return this.triangular;
     }
 
     isDiagonal() {
@@ -386,7 +433,10 @@ class Matrix {
         // next implement complex numbers
         // sometimes also breaks for other number idk really
 
-        if (this.isDiagonal()) {
+        // if it is triangular the eigenvalues are the diagonal entries
+        // this covers 3 cases upper lower triangularity and diagonal matricies
+
+        if (this.isTriangular()) {
             for (let index = 0; index < n; index++) {
                 eigenValues.push(this.get(index, index));
             }
