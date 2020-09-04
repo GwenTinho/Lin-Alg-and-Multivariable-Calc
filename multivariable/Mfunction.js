@@ -1,7 +1,7 @@
-import Vector from "../Vector";
-import Matrix from "../Matrix";
-import Plane from "../Plane";
-import Point from "../Point";
+import Vector from "../linalg/Vector";
+import Matrix from "../linalg/Matrix";
+import Plane from "../linalg/Plane";
+import Point from "../linalg/Point";
 
 // a class that describes a multivariable function R^n -> R^m and implements a bunch of operators for that function
 

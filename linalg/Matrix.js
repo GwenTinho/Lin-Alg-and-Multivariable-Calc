@@ -1,6 +1,6 @@
 import Vector from "./Vector";
-import newtonsMethod from "./helperFunctions/newtonsMethod";
-import rootProduct from "./helperFunctions/rootProduct";
+import newtonsMethod from "../helperFunctions/newtonsMethod";
+import rootProduct from "../helperFunctions/rootProduct";
 
 class Matrix {
     constructor(vectors) {
