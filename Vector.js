@@ -103,6 +103,12 @@ class Vector {
         return new Vector([...this.coordinates]);
     }
 
+    toString() {
+        if (this.coordinates.length === 0) return "[]";
+
+        return this.coordinates + "";
+    }
+
     static findAngle(v1, v2) {
         v1.dot(v2) / (v1.getNorm() * v2.getNorm());
     }

@@ -8,18 +8,19 @@ import bernoulli from "./bernoulli/bernoulli";
 import Mfunction from "./multivariable/Mfunction";
 
 
-let f = new Mfunction(2, 1,
-    v => 3 * v.get(0) ** 2 * v.get(1) - v.get(1) ** 3 - 3 * v.get(0) ** 2 - 3 * v.get(1) ** 2
-);
+let M1 = new Matrix([
+    new Vector([4, -14, -12]),
+    new Vector([-14, 10, 13]),
+    new Vector([-12, 13, 1])
+]);
 
-console.log(f.hasMaximumAt(new Vector([0, 0])));
-console.log(f.hasSaddleAt(new Vector([0, -2])));
-console.log(f.hasSaddleAt(new Vector([Math.sqrt(3), 1])));
-console.log(f.hasSaddleAt(new Vector([-Math.sqrt(3), 1])));
+
+
+console.log(M1.getEigenValues());
 
 /*
 
 note to self:
 test eigenvalue alg to avoid weird edge cases
-
+// more testing pls
 */

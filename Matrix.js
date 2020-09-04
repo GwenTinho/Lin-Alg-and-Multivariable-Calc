@@ -20,8 +20,10 @@ class Matrix {
     multByVector(vector) {
         let coords = [];
 
-        for (let i = 0; i < this.vectors.length; i++) {
-            coords.push(this.vectors[i].dot(vector));
+        const rows = this.getDimensions()[0];
+
+        for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+            coords.push(this.getRow(rowIndex).dot(vector));
         }
 
         return new Vector(coords);
@@ -200,6 +202,18 @@ class Matrix {
         return new Vector([...this.vectors[col].coordinates])
     }
 
+    getRow(row) {
+        let coords = [];
+
+        const nbrColumns = this.getDimensions()[1];
+
+        for (let col = 0; col < nbrColumns; col++) {
+            coords.push(this.get(row, col));
+        }
+
+        return new Vector(coords);
+    }
+
     set(row, column, value) {
         this.vectors[column].set(row, value);
     }
@@ -278,12 +292,13 @@ class Matrix {
 
         if (this.getDimensions()[1] !== matrix.getDimensions()[0]) return Matrix.getEmptyMatrix(); // check if they can be multiplied
 
-        let transpose = this.T();
 
         let colVectors = [];
 
-        for (let i = 0; i < this.vectors.length; i++) {
-            colVectors.push(transpose.multByVector(matrix.vectors[i]));
+        const columns = this.getDimensions()[1];
+
+        for (let colIndex = 0; colIndex < columns; colIndex++) {
+            colVectors.push(this.multByVector(matrix.getCol(colIndex)));
         }
 
         return new Matrix(colVectors);
