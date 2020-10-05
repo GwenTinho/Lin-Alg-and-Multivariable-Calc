@@ -2,13 +2,25 @@ import Vector from "./linalg/Vector";
 import Matrix from "./linalg/Matrix";
 
 
-let M1 = new Matrix([
-    new Vector([4, -14, -12]),
-    new Vector([-14, 10, 13]),
-    new Vector([-12, 13, 1])
+let C = new Matrix([
+    new Vector([1, 3]),
+    new Vector([4, 1]),
+    new Vector([2, 5])
 ]);
 
-console.log(M1.getEigenValues());
+let D = new Matrix([
+    new Vector([1, -1, 3]),
+    new Vector([5, 0, 2]),
+    new Vector([2, 1, 4])
+]);
+
+let E = new Matrix([
+    new Vector([6, -1, 4]),
+    new Vector([1, 1, 1]),
+    new Vector([5, 1, 3])
+])
+
+console.log(D.mul(E.T()).trace());
 
 /*
 note to self:
@@ -16,3 +28,5 @@ test eigenvalue alg to avoid weird edge cases
 // more testing pls
 also do testing for new triangularity checks
 */
+
+// test
