@@ -1,6 +1,7 @@
 import Vector from "./Vector";
 import newtonsMethod from "../helperFunctions/newtonsMethod";
 import rootProduct from "../helperFunctions/rootProduct";
+import rref from "./rref";
 
 class Matrix {
     constructor(vectors) {
@@ -18,6 +19,28 @@ class Matrix {
         this.upperTriangular = null;
         this.lowerTriangular = null;
         this.triangular = null;
+        this.validDimensional = null;
+        this.rref = null;
+        this.inverse = null;
+        this.rank = null;
+
+        if (!this.isValidDimensional()) this.errors.push(new Error("invalid dimensions"));
+    }
+
+    isValidDimensional() {
+        if (this.validDimensional == null) {
+            const comp = this.vectors[0].getDimension();
+
+            for (let index = 0; index < this.vectors.length; index++) {
+                if (comp != this.vectors[index].getDimension()) {
+                    this.validDimensional = false;
+                    return false;
+                }
+            }
+            this.validDimensional = true;
+            return true;
+        }
+        return this.validDimensional;
     }
 
     multByVector(vector) {
@@ -40,74 +63,44 @@ class Matrix {
         return new Matrix(this.copyInstance().vectors.map(vector => vector.mult(number)));
     }
 
-    initValues() {
+    initValues() { // implement my own version
 
         this.symmetric = this.isEqual(this.T());
 
-        const dims = this.getDimensions();
-        const rows = dims[0];
-        const columns = dims[1];
+        const reducer = rref(this);
 
-        let rref = this.copyInstance();
-        let iden = Matrix.getIdentityMatrix(rows);
-
-        let factors = 1;
-        let lead = 0;
-
-        for (let r = 0; r < rows; r++) {
-            if (columns <= lead) {
-                this.rref = Matrix.getEmptyMatrix();
-                this.det = 0;
-                this.inverse = Matrix.getEmptyMatrix();
-                return;
-            }
-            let i = r;
-            while (rref.get(i, lead) === 0) {
-                i++;
-                if (rows == i) {
-                    i = r;
-                    lead++;
-                    if (columns == lead) {
-                        this.rref = Matrix.getEmptyMatrix();
-                        this.det = 0;
-                        this.inverse = Matrix.getEmptyMatrix();
-                        return;
-                    }
-                }
-            }
-
-            rref = rref.swapRow(i, r);
-            iden = iden.swapRow(i, r);
-
-            let val = rref.get(r, lead);
-
-            rref = rref.multiplyRow(r, 1 / val);
-            iden = iden.multiplyRow(r, 1 / val);
-
-            factors *= -val;
-
-            for (let i = 0; i < rows; i++) {
-                if (i == r) continue;
-                val = rref.get(i, lead);
-
-                rref = rref.addMultRow(i, r, -val);
-                iden = iden.addMultRow(i, r, -val);
-            }
-            lead++;
-        }
-
-        let accumulator = factors;
-
-        for (let i = 0; i < columns; i++) {
-            accumulator *= rref.get(i, i);
-        }
-
-        this.rref = rref;
-        this.det = accumulator;
-        this.inverse = (this.det === 0) ? Matrix.getEmptyMatrix() : iden;
+        this.rref = reducer.rref;
+        this.det = reducer.determinant;
+        this.inverse = (this.det === 0) ? Matrix.getEmptyMatrix() : reducer.conversionMatrix;
         this.orthogonal = (this.det === 0) ? false : this.isEqual(this.inverse.T());
 
+        this.rank = this.rref.calcNonZeroRows();
+
         return this;
+    }
+
+    getRref() {
+        if (this.rref === null) {
+            this.initValues();
+            return this.rref;
+        }
+        return this.rref;
+    }
+
+    getRank() {
+        if (this.rank === null) {
+            this.initValues();
+            return this.rank;
+        }
+        return this.rank;
+    }
+
+    getInverse() {
+        if (this.inverse === null) {
+            this.initValues();
+            return this.inverse;
+        }
+        return this.inverse;
     }
 
     isOrthogonal() {
@@ -283,8 +276,27 @@ class Matrix {
         return outM;
     }
 
+    /**
+     * Gives back the order of the matrix as an array
+     * 
+     * @returns {number[]} [row,column]
+     * 
+     */
+
     getDimensions() { // row colomn
         return [this.vectors[0].getDimension(), this.vectors.length];
+    }
+
+    calcNonZeroRows() {
+        const rows = this.getDimensions()[0];
+        const columns = this.getDimensions()[1];
+        let counter = 0;
+
+        for (let index = 0; index < rows; index++) {
+            if (this.getRow(index).isEqual(Vector.zero(columns))) counter++;
+        }
+
+        return rows - counter;
     }
 
     isSameDimensions(matrix) {
@@ -380,6 +392,14 @@ class Matrix {
 
         return matrix;
     }
+
+    /**
+     * Swaps the rows at idx1 and idx2
+     * 
+     * @param {number} idx1 idx1 must be an integer. Index of the first row to be swapped.
+     * @param {number} idx2 idx2 must be an integer. Index of the first row to be swapped.
+     * @returns A new matrix with swapped rows
+     */
 
     swapRow(idx1, idx2) {
         if (idx1 === idx2) return this.copyInstance();

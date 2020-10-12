@@ -1,20 +1,20 @@
 {
-  "name": "matricies",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "test": "nodemon --exec babel-node --max-old-space-size=8192 index",
-    "start": "babel-node --max-old-space-size=8192 index"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@babel/cli": "^7.10.5",
-    "@babel/core": "^7.11.1",
-    "@babel/node": "^7.10.5",
-    "@babel/polyfill": "^7.10.4",
-    "@babel/preset-env": "^7.11.0",
-    "nodemon": "^1.19.4"
-  }
+    "name": "matricies",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "scripts": {
+        "test": "nodemon --exec babel-node --max-old-space-size=8192 index",
+        "start": "babel-node --max-old-space-size=8192 index"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@babel/cli": "^7.10.5",
+        "@babel/core": "^7.11.1",
+        "@babel/node": "^7.10.5",
+        "@babel/polyfill": "^7.10.4",
+        "@babel/preset-env": "^7.11.0",
+        "nodemon": "^1.19.4"
+    }
 }
