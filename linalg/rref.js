@@ -67,7 +67,7 @@ function rref(matrix) {
                 if (reducedMatrix.get(rowIndex, currentPivotColumn) !== 0) {
 
                     reducedMatrix = reducedMatrix.swapRow(currentPivotRow, rowIndex);
-                    conversionMatrix = conversionMatrix.swapRow(currentPivotRow, rowIndex);
+                    conversionMatrix = reducedMatrix.swapRow(currentPivotRow, rowIndex);
                     determinant *= -1;
 
                     isFullOfZeros = false;
@@ -92,7 +92,10 @@ function rref(matrix) {
 
         for (let rowIndex = currentPivotRow + 1; rowIndex < rows; rowIndex++) {
             if (reducedMatrix.get(rowIndex, currentPivotColumn) !== 0) {
-                reducedMatrix = reducedMatrix.addMultRow(rowIndex, currentPivotRow, -reducedMatrix.get(rowIndex, currentPivotColumn));
+                const scalar2 = -reducedMatrix.get(rowIndex, currentPivotColumn); // bad naming
+
+                reducedMatrix = reducedMatrix.addMultRow(rowIndex, currentPivotRow, scalar2);
+                conversionMatrix = conversionMatrix.addMultRow(rowIndex, currentPivotRow, scalar2);
             }
         }
 
@@ -114,7 +117,10 @@ function rref(matrix) {
 
         for (let rowIndex = lastPivotRow - 1; rowIndex >= 0; rowIndex--) {
             if (reducedMatrix.get(rowIndex, lastPivotColumn) !== 0) {
-                reducedMatrix = reducedMatrix.addMultRow(rowIndex, lastPivotColumn, -reducedMatrix.get(rowIndex, lastPivotColumn));
+                const scalar3 = -reducedMatrix.get(rowIndex, lastPivotColumn);
+
+                reducedMatrix = reducedMatrix.addMultRow(rowIndex, lastPivotColumn, scalar3);
+                conversionMatrix = conversionMatrix.addMultRow(rowIndex, lastPivotColumn, scalar3);
             }
         }
 

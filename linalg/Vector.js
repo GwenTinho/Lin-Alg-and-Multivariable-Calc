@@ -89,11 +89,11 @@ class Vector {
         return this;
     }
 
-    isEqual(vector) {
+    isEqual(vector, maxError = 1e-6) {
         if (this.getDimension() !== vector.getDimension()) return false;
 
         for (let i = 0; i < this.coordinates.length; i++) {
-            if (this.coordinates[i] !== vector.coordinates[i]) return false;
+            if (Math.abs(this.coordinates[i] - vector.coordinates[i]) > maxError) return false;
         }
 
         return true;

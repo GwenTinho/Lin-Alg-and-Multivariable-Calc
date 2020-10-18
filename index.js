@@ -1,19 +1,9 @@
 import Vector from "./linalg/Vector";
 import Matrix from "./linalg/Matrix";
 import EquationSolver from "./linalg/EquationSolver";
+import InverseTester from "./unitTests/InverseTester";
 
-let A = new Matrix([
-    new Vector([2, 0, 0]),
-    new Vector([-1, 1, 0]),
-    new Vector([3, 2, 4]),
-]);
-
-let B = new Matrix([new Vector([1, 0, -2])])
-
-
-
-console.log((new EquationSolver(A, B)).solve().toString());
-
+console.log((new InverseTester(100000, 3, 1e-4)).run());
 /*
 note to self:
 test eigenvalue alg to avoid weird edge cases

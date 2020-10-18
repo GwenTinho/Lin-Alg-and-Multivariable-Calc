@@ -328,7 +328,7 @@ class Matrix {
         return dim[0] === dim[1];
     }
 
-    isEqual(matrix) {
+    isEqual(matrix, maxError = 1e-6) {
         if (!this.isSameDimensions(matrix)) return false;
 
         for (let i = 0; i < this.vectors.length; i++) {
@@ -574,6 +574,29 @@ class Matrix {
 
     static getEmptyMatrix() {
         return new Matrix([]);
+    }
+
+    /**
+     * 
+     * @param {Function} f takes the row and column index as input and returns a number
+     * @param {number} rows number of rows
+     * @param {number} columns number of columns
+     */
+    static fromCondition(f, rows, columns) {
+        let vectors = [];
+        for (let c = 0; c < columns; c++) {
+            let entries = [];
+            for (let r = 0; r < rows; r++) {
+                entries.push(f(r, c));
+            }
+            vectors.push(new Vector(entries));
+        }
+
+        return new Matrix(vectors);
+    }
+
+    static randomIntMatrix(rows, columns, min = 0, max = 10) {
+        return Matrix.fromCondition((i, j) => min + Math.floor(Math.random() * (max - min + 1)), rows, columns);
     }
 }
 
