@@ -35,7 +35,7 @@ function getPivotColumnInRow(reducedMatrix, rowIndex) {
  * Turns a matrix to its rref
  * 
  * @param {Matrix} matrix A mxn matrix to be reduced
- * @return {{rref,conversionMatrix,determinant}} an object holding the rref, conversion matrix and the determinant
+ * @return {{rref:Matrix,conversionMatrix:Matrix,determinant:number}} an object holding the rref, conversion matrix and the determinant
  */
 
 function rref(matrix) {

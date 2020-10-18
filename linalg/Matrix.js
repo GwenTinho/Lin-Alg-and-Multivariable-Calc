@@ -27,6 +27,13 @@ class Matrix {
         if (!this.isValidDimensional()) this.errors.push(new Error("invalid dimensions"));
     }
 
+    /**
+     * @returns {Vector[]} a array of column vectors
+     */
+    getVectors() {
+        return this.copyInstance().vectors;
+    }
+
     isValidDimensional() {
         if (this.validDimensional == null) {
             const comp = this.vectors[0].getDimension();
@@ -65,13 +72,14 @@ class Matrix {
 
     initValues() { // implement my own version
 
-        this.symmetric = this.isEqual(this.T());
+        if (this.isSquare()) this.symmetric = this.isEqual(this.T());
 
         const reducer = rref(this);
 
-        this.rref = reducer.rref;
+        this.rref = reducer.rref.copyInstance();
+
         this.det = reducer.determinant;
-        this.inverse = (this.det === 0) ? Matrix.getEmptyMatrix() : reducer.conversionMatrix;
+        this.inverse = (this.det === 0) ? null : reducer.conversionMatrix.copyInstance();
         this.orthogonal = (this.det === 0) ? false : this.isEqual(this.inverse.T());
 
         this.rank = this.rref.calcNonZeroRows();
@@ -79,12 +87,20 @@ class Matrix {
         return this;
     }
 
+    /**
+     *  @returns {Matrix} the rref of this
+     */
+
     getRref() {
         if (this.rref === null) {
             this.initValues();
             return this.rref;
         }
         return this.rref;
+    }
+
+    getNulliy() {
+        return this.getDimensions()[1] - this.getRank();
     }
 
     getRank() {
