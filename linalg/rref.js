@@ -86,7 +86,7 @@ function rref(matrix) {
 
         reducedMatrix = reducedMatrix.multiplyRow(currentPivotRow, 1 / scalar);
         conversionMatrix = conversionMatrix.multiplyRow(currentPivotRow, 1 / scalar);
-        determinant *= scalar;
+        determinant *= scalar; // inverse row operation
 
         // Step3: Add suitable multiples of the top row to the other rows and make sure that all entreis apart from the pivot are 0
 

@@ -10,8 +10,8 @@ class Matrix {
         if (vectors.length !== 0) this.vectors = vectors; // matrix as array of column vectors
         else this.errors.push(new Error("empty vectors array"));
 
-        this.det;
-        this.inverse;
+        this.det = null;
+        this.inverse = null;
         this.rref;
         this.orthogonal;
         this.symmetric;
@@ -117,6 +117,14 @@ class Matrix {
             return this.inverse;
         }
         return this.inverse;
+    }
+
+    getDeterminant() {
+        if (this.det === null) {
+            this.initValues();
+            return this.det;
+        }
+        return this.det;
     }
 
     isOrthogonal() {
@@ -328,11 +336,17 @@ class Matrix {
         return dim[0] === dim[1];
     }
 
+    /**
+     * Returns true if the absolute difference between each entry is within the maxError
+     * 
+     * @param {Matrix} Matrix Matrix that we compare against
+     * @param {number} maxError maximum margin of error
+     */
     isEqual(matrix, maxError = 1e-6) {
         if (!this.isSameDimensions(matrix)) return false;
 
         for (let i = 0; i < this.vectors.length; i++) {
-            if (!this.vectors[i].isEqual(matrix.vectors[i])) return false;
+            if (!this.vectors[i].isEqual(matrix.vectors[i], maxError)) return false;
         }
 
         return true;
@@ -458,10 +472,10 @@ class Matrix {
 
 
     getEigenValues() { // needs a lot more testing 
+
         if (!this.isSquare()) return [];
 
         const n = this.getDimensions()[0];
-        const inital = 2;
 
         let eigenValues = []; // divide the characteristic poly fn through (lambda - previous eigenvalues) to remove those solutions.
 
@@ -482,10 +496,10 @@ class Matrix {
         for (let index = 0; index < n; index++) {
 
             if (eigenValues.length == 0) {
-                const eigenValue = newtonsMethod(lambda => Matrix.getCharacteristicPolyAt(lambda, this), inital, 1e-8, 10)
+                const eigenValue = newtonsMethod(lambda => Matrix.getCharacteristicPolyAt(lambda, this));
                 eigenValues.push(eigenValue);
             } else {
-                const eigenValue = newtonsMethod(lambda => (Matrix.getCharacteristicPolyAt(lambda, this) / rootProduct(lambda, eigenValues)), inital, 1e-8, 10)
+                const eigenValue = newtonsMethod(lambda => (Matrix.getCharacteristicPolyAt(lambda, this) / rootProduct(lambda, eigenValues)));
                 eigenValues.push(eigenValue);
             }
         }
@@ -530,9 +544,7 @@ class Matrix {
 
         let AminusLambda = A.sub(Matrix.getIdentityMatrixMultiple(n, lambda));
 
-        AminusLambda.initValues();
-
-        return AminusLambda.det;
+        return AminusLambda.getDeterminant();
     }
 
     static getIdentityMatrix(n) {

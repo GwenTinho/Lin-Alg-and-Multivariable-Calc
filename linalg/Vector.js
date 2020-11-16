@@ -89,6 +89,12 @@ class Vector {
         return this;
     }
 
+    /**
+     * Returns true if the absolute difference between each entry is within the maxError
+     * 
+     * @param {Vector} vector vector that we compare against
+     * @param {number} maxError maximum margin of error
+     */
     isEqual(vector, maxError = 1e-6) {
         if (this.getDimension() !== vector.getDimension()) return false;
 

@@ -8,16 +8,20 @@ class InverseTester {
     }
 
     run() {
-        let positive = 0;
+        let positiveCounter = 0;
+        let singularCounter = 0;
 
         for (let index = 0; index < this.runs; index++) {
             const A = Matrix.randomIntMatrix(this.dimensions, this.dimensions);
             const inverseA = A.getInverse();
-            if (!inverseA) continue;
-            if (A.mul(inverseA).isEqual(Matrix.getIdentityMatrix(this.dimensions), this.maxError)) positive++;
+            if (!inverseA) {
+                singularCounter++;
+                continue;
+            }
+            if (A.mul(inverseA).isEqual(Matrix.getIdentityMatrix(this.dimensions), this.maxError)) positiveCounter++;
         }
 
-        return positive / this.runs;
+        return positiveCounter / (this.runs - singularCounter);
     }
 }
 
