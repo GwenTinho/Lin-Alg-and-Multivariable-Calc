@@ -1,3 +1,5 @@
+import Matrix from "../linalg/Matrix";
+
 function newtonsMethod(fn, error = 1e-5, maxIterations = 20) {
     debugger
     let pivot = bisectionMethod(fn);
@@ -20,6 +22,7 @@ function newtonsMethod(fn, error = 1e-5, maxIterations = 20) {
     return pivot;
 }
 
+
 function bisectionMethod(f, error = 0.5, maxIterations = 30) {
     let a = -20;
     let b = 20;
@@ -31,7 +34,6 @@ function bisectionMethod(f, error = 0.5, maxIterations = 30) {
 
         c = (a + b) / 2;
     }
-    console.log(c)
     return c;
 }
 

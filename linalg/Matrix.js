@@ -1,5 +1,5 @@
 import Vector from "./Vector";
-import newtonsMethod from "../helperFunctions/newtonsMethod";
+import rootFinders from "../helperFunctions/rootFinders";
 import rootProduct from "../helperFunctions/rootProduct";
 import rref from "./rref";
 
@@ -496,10 +496,10 @@ class Matrix {
         for (let index = 0; index < n; index++) {
 
             if (eigenValues.length == 0) {
-                const eigenValue = newtonsMethod(lambda => Matrix.getCharacteristicPolyAt(lambda, this));
+                const eigenValue = rootFinders.newtonsMethod(lambda => Matrix.getCharacteristicPolyAt(lambda, this));
                 eigenValues.push(eigenValue);
             } else {
-                const eigenValue = newtonsMethod(lambda => (Matrix.getCharacteristicPolyAt(lambda, this) / rootProduct(lambda, eigenValues)));
+                const eigenValue = rootFinders.newtonsMethod(lambda => (Matrix.getCharacteristicPolyAt(lambda, this) / rootProduct(lambda, eigenValues)));
                 eigenValues.push(eigenValue);
             }
         }
@@ -533,6 +533,10 @@ class Matrix {
         }
 
         return word;
+    }
+
+    getSubmatrixAlongFirstEntry() {
+        return new Matrix(this.getVectors().slice(1).map(v => new Vector(v.getCoordinates().slice(1))));
     }
 
     static getCharacteristicPolyAt(lambda, matrix) {

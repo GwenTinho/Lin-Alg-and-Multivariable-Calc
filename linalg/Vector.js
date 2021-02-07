@@ -84,6 +84,10 @@ class Vector {
         return this.coordinates[row];
     }
 
+    getCoordinates() {
+        return this.copyInstance().coordinates;
+    }
+
     addToRow(row, value) {
         this.set(row, this.get(row) + value);
         return this;
