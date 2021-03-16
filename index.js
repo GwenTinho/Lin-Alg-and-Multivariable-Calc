@@ -4,19 +4,26 @@ import EquationSolver from "./linalg/EquationSolver";
 import InverseTester from "./unitTests/InverseTester";
 import operators from "./linalg/operators";
 import print from "./helperFunctions/print";
+import basisFinder from "./linalg/BasisFinder";
 
 let A = new Matrix([
-    new Vector([2, 1, 4]),
-    new Vector([1, -1, 3]),
-    new Vector([3, 2, 5])
+    new Vector([1, -3, 2]),
+    new Vector([-2, 6, -4]),
+    new Vector([2, -1, 5]),
+    new Vector([3, 1, 8]),
+    new Vector([-1, -7, -4])
 ]);
 
-let v = new Vector([3, 2]);
-let rotV = operators.rotateCCL2D(v, Math.PI);
+const colSpace = basisFinder.findColSpaceBasis(A);
+const rowSpace = basisFinder.findRowSpaceBasis(A);
 
-print(v);
-print(rotV);
-print(operators.rotateCCL2D(rotV, Math.PI));
+for (let i = 0; i < colSpace.length; i++) {
+    print(colSpace[i]);
+}
+
+for (let i = 0; i < rowSpace.length; i++) {
+    print(rowSpace[i]);
+}
 
 /*
 note to self:

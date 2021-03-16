@@ -302,12 +302,12 @@ class Matrix {
 
     /**
      * Gives back the order of the matrix as an array
-     * 
+     *
      * @returns {number[]} [row,column]
-     * 
+     *
      */
 
-    getDimensions() { // row colomn
+    getDimensions() { // row column
         return [this.vectors[0].getDimension(), this.vectors.length];
     }
 
@@ -338,7 +338,7 @@ class Matrix {
 
     /**
      * Returns true if the absolute difference between each entry is within the maxError
-     * 
+     *
      * @param {Matrix} Matrix Matrix that we compare against
      * @param {number} maxError maximum margin of error
      */
@@ -425,7 +425,7 @@ class Matrix {
 
     /**
      * Swaps the rows at idx1 and idx2
-     * 
+     *
      * @param {number} idx1 idx1 must be an integer. Index of the first row to be swapped.
      * @param {number} idx2 idx2 must be an integer. Index of the first row to be swapped.
      * @returns A new matrix with swapped rows
@@ -471,7 +471,7 @@ class Matrix {
 
 
 
-    getEigenValues() { // needs a lot more testing 
+    getEigenValues() { // needs a lot more testing
 
         if (!this.isSquare()) return [];
 
@@ -593,7 +593,7 @@ class Matrix {
     }
 
     /**
-     * 
+     *
      * @param {Function} f takes the row and column index as input and returns a number
      * @param {number} rows number of rows
      * @param {number} columns number of columns

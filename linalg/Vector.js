@@ -29,6 +29,15 @@ class Vector {
         return this.dot(vector) !== this.getNorm() * vector.getNorm();
     }
 
+    isZero() {
+        for (let i = 0; i < this.getDimension(); i++) {
+            if (this.get(i) !== 0) {
+                return false;
+            }
+        }
+        return true
+    }
+
     getDimension() {
         return this.coordinates.length;
     }
@@ -95,7 +104,7 @@ class Vector {
 
     /**
      * Returns true if the absolute difference between each entry is within the maxError
-     * 
+     *
      * @param {Vector} vector vector that we compare against
      * @param {number} maxError maximum margin of error
      */
