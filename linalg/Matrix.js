@@ -1,7 +1,7 @@
 import Vector from "./Vector";
-import rootFinders from "../helperFunctions/rootFinders";
-import rootProduct from "../helperFunctions/rootProduct";
 import rref from "./rref";
+import powerIteration from "./powerIteration";
+import basisFinder from "./BasisFinder";
 
 class Matrix {
     constructor(vectors) {
@@ -82,7 +82,7 @@ class Matrix {
         this.rref = reducer.rref.copyInstance();
 
         this.det = reducer.determinant;
-        if (this.det === 0) {
+        if (this.det !== 0) {
             this.inverse = reducer.conversionMatrix.copyInstance();
             this.conversionMatrix = reducer.conversionMatrix.copyInstance();
         }
@@ -489,40 +489,48 @@ class Matrix {
 
 
 
-    getEigenValues() { // needs a lot more testing
+    getEigenValues() { // we just kinda pray that eigenvalues are real
 
         if (!this.isSquare()) throw new Error("Can't find eigenvalues of non square matrix");
 
         const n = this.getDimensions()[0];
 
-        let eigenValues = []; // divide the characteristic poly fn through (lambda - previous eigenvalues) to remove those solutions.
-
-        // breaks for complex solutions
-        // next implement complex numbers
-        // sometimes also breaks for other number idk really
-
-        // if it is triangular the eigenvalues are the diagonal entries
-        // this covers 3 cases upper lower triangularity and diagonal matricies
-
         if (this.isTriangular()) {
+            let eigenValues = [];
             for (let index = 0; index < n; index++) {
                 eigenValues.push(this.get(index, index));
             }
             return eigenValues;
         }
 
-        for (let index = 0; index < n; index++) {
+        // uses this https://en.wikipedia.org/wiki/Power_iteration , my old algo is just stupid
 
-            if (eigenValues.length == 0) {
-                const eigenValue = rootFinders.newtonsMethod(lambda => Matrix.getCharacteristicPolyAt(lambda, this));
-                eigenValues.push(eigenValue);
-            } else {
-                const eigenValue = rootFinders.newtonsMethod(lambda => (Matrix.getCharacteristicPolyAt(lambda, this) / rootProduct(lambda, eigenValues)));
-                eigenValues.push(eigenValue);
-            }
+        return powerIteration.powerIteration(this);
+    }
+
+    getRowSpaceBasis() {
+        return basisFinder.findRowSpaceBasis(this);
+    }
+
+    getColumnSpaceBasis() {
+        return basisFinder.findColSpaceBasis(this);
+    }
+
+    getNullSpaceBasis() {
+        return basisFinder.findNullSpaceBasis(this);
+    }
+
+    getEigenSpaceBases() {
+        let eigenSpaces = [];
+        const eigenValues = this.getEigenValues();
+
+        for (let i = 0; i < eigenValues.length; i++) {
+            eigenSpaces.push({
+                eigenValue: eigenValues[i],
+                eigenSpaceBasis: basisFinder.findNullSpaceBasis(Matrix.getIdentityMatrixMultiple(this.getDimensions()[0], eigenValues[i]).sub(this))
+            })
         }
-
-        return eigenValues;
+        return eigenSpaces;
     }
 
     trace() {

@@ -6,6 +6,7 @@ class Vector {
     }
 
     dot(vector) {
+        if (!vector) throw new Error("vector is falsy");
         if (vector.getDimension() !== this.getDimension()) throw new Error("Cannot dot vectors with different dimensions: A: " + this.getDimension() + ", B: " + vector.getDimension());
 
         let sum = 0;
@@ -79,6 +80,20 @@ class Vector {
             this.coordinates[i] -= vector.coordinates[i];
         }
         return this;
+    }
+
+    /**
+     * When using this function you must be able to guarantee that this = k * vector
+     * @param {Vector} vector
+     * @returns a multiplier of this = k * vector
+     */
+    findMultiplier(vector) {
+        for (let i = 0; i < this.getDimension(); i++) {
+            if (this.get(i) !== 0) {
+                return this.get(i) / vector.get(i);
+            }
+        }
+        throw new Error("Cannot compare zero vector");
     }
 
     negate(row) {
@@ -158,6 +173,19 @@ class Vector {
 
     static nullVector() {
         return new Vector([]);
+    }
+
+    /**
+     * @param {Number} n
+     * @returns {Vector} a vector with random coordinates between 0 and 10 (both included)
+     */
+    static randomVector(n) {
+        const coords = [];
+
+        for (let index = 0; index < n; index++) {
+            coords.push(Math.floor(Math.random() * 11));
+        }
+        return new Vector(coords);
     }
 
     static zero(n) {

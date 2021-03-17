@@ -81,10 +81,11 @@ function findColSpaceBasis(m) {
  * @param {Matrix} m
  */
 function findNullSpaceBasis(m) {
+  if (m.getNulliy() === 0) return [];
+
   const transpose = m.T();
 
   const rref = transpose.getRref(); // B
-
   const reducedMatrix = transpose.getConversionMatrix(); // M
 
   const basis = [];

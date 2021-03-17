@@ -7,11 +7,8 @@ import print from "./helperFunctions/print";
 import basisFinder from "./linalg/BasisFinder";
 
 let A = new Matrix([
-    new Vector([1, -3, 2]),
-    new Vector([-2, 6, -4]),
-    new Vector([2, -1, 5]),
-    new Vector([3, 1, 8]),
-    new Vector([-1, -7, -4])
+    new Vector([1, 3]),
+    new Vector([2, -4])
 ]);
 
 const nullSpace = basisFinder.findNullSpaceBasis(A);
@@ -19,6 +16,8 @@ const nullSpace = basisFinder.findNullSpaceBasis(A);
 for (let i = 0; i < nullSpace.length; i++) {
     print(nullSpace[i]);
 }
+
+console.log(A.getEigenSpaceBases()[1].eigenSpaceBasis) // doesnt work yet
 
 /*
 note to self:
