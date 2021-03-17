@@ -75,7 +75,61 @@ function findColSpaceBasis(m) {
   return basis;
 }
 
+
+/**
+ *
+ * @param {Matrix} m
+ */
+function findNullSpaceBasis(m) {
+  const transpose = m.T();
+
+  const rref = transpose.getRref(); // B
+
+  const reducedMatrix = transpose.getConversionMatrix(); // M
+
+  const basis = [];
+  const rows = rref.getDimensions()[0];
+
+  for (let i = 0; i < rows; i++) {
+    if (rref.getRow(i).isZero()) {
+      basis.push(reducedMatrix.getRow(i));
+    }
+  }
+
+  return basis;
+}
+
+//from the last answer here https://math.stackexchange.com/questions/433932/equivalent-basis-of-a-subspace
+
+function spansSameSpace(basis1, basis2) {
+  const U = new Matrix(basis1);
+  const V = new Matrix(basis2);
+
+  const rankU = U.getRank();
+  const rankV = V.getRank();
+
+  if (rankU !== rankV) return false;
+
+  const R = U.getRref();
+
+  const convMat = U.getConversionMatrix().copyInstance();
+
+  const VBar = convMat.mul(V);
+  const rows = R.getDimensions()[0];
+
+
+
+  for (let i = 0; i < rows; i++) {
+    if (R.getRow(i).isZero()) {
+      if (!VBar.getRow(i).isZero()) return false;
+    }
+  }
+  return true;
+}
+
 export default {
   findColSpaceBasis,
-  findRowSpaceBasis
+  findRowSpaceBasis,
+  findNullSpaceBasis,
+  spansSameSpace
 }

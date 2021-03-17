@@ -5,10 +5,9 @@ import rref from "./rref";
 
 class Matrix {
     constructor(vectors) {
-        this.errors = [];
 
         if (vectors.length !== 0) this.vectors = vectors; // matrix as array of column vectors
-        else this.errors.push(new Error("empty vectors array"));
+        else throw new Error("empty vectors array");
 
         this.det = null;
         this.inverse = null;
@@ -22,9 +21,11 @@ class Matrix {
         this.validDimensional = null;
         this.rref = null;
         this.inverse = null;
+        this.conversionMatrix = null;
         this.rank = null;
+        this.initialized = false;
 
-        if (!this.isValidDimensional()) this.errors.push(new Error("invalid dimensions"));
+        if (!this.isValidDimensional()) throw new Error("invalid dimensions");
     }
 
     /**
@@ -70,7 +71,9 @@ class Matrix {
         return new Matrix(this.copyInstance().vectors.map(vector => vector.mult(number)));
     }
 
-    initValues() { // implement my own version
+    initValues() {
+
+        if (this.initialized) return this;
 
         if (this.isSquare()) this.symmetric = this.isEqual(this.T());
 
@@ -79,10 +82,18 @@ class Matrix {
         this.rref = reducer.rref.copyInstance();
 
         this.det = reducer.determinant;
-        this.inverse = (this.det === 0) ? null : reducer.conversionMatrix.copyInstance();
+        if (this.det === 0) {
+            this.inverse = reducer.conversionMatrix.copyInstance();
+            this.conversionMatrix = reducer.conversionMatrix.copyInstance();
+        }
+        else {
+            this.inverse = null;
+            this.conversionMatrix = reducer.conversionMatrix.copyInstance();
+        }
         this.orthogonal = (this.det === 0) ? false : this.isEqual(this.inverse.T());
 
         this.rank = this.rref.calcNonZeroRows();
+        this.initialized = true;
 
         return this;
     }
@@ -94,7 +105,6 @@ class Matrix {
     getRref() {
         if (this.rref === null) {
             this.initValues();
-            return this.rref;
         }
         return this.rref;
     }
@@ -106,7 +116,6 @@ class Matrix {
     getRank() {
         if (this.rank === null) {
             this.initValues();
-            return this.rank;
         }
         return this.rank;
     }
@@ -114,15 +123,20 @@ class Matrix {
     getInverse() {
         if (this.inverse === null) {
             this.initValues();
-            return this.inverse;
         }
         return this.inverse;
+    }
+
+    getConversionMatrix() {
+        if (this.conversionMatrix === null) {
+            this.initValues();
+        }
+        return this.conversionMatrix;
     }
 
     getDeterminant() {
         if (this.det === null) {
             this.initValues();
-            return this.det;
         }
         return this.det;
     }
@@ -263,22 +277,26 @@ class Matrix {
     }
 
     getCol(col) {
-        return new Vector([...this.vectors[col].coordinates])
+        if (col >= 0 && col < this.getDimensions()[1]) return new Vector([...this.vectors[col].coordinates]);
+        throw new Error("Invalid column index in getCol: " + col);
     }
 
     getRow(row) {
-        let coords = [];
+        if (row >= 0 && row < this.getDimensions()[0]) {
+            let coords = [];
 
-        const nbrColumns = this.getDimensions()[1];
+            const nbrColumns = this.getDimensions()[1];
 
-        for (let col = 0; col < nbrColumns; col++) {
-            coords.push(this.get(row, col));
+            for (let col = 0; col < nbrColumns; col++) {
+                coords.push(this.get(row, col));
+            }
+
+            return new Vector(coords);
         }
-
-        return new Vector(coords);
+        throw new Error("Invalid row index in getRow: " + row);
     }
 
-    set(row, column, value) {
+    set(row, column, value) { // implement better error handling
         this.vectors[column].set(row, value);
     }
 
@@ -379,12 +397,12 @@ class Matrix {
 
     mul(matrix) {
 
-        if (this.getDimensions()[1] !== matrix.getDimensions()[0]) return Matrix.getEmptyMatrix(); // check if they can be multiplied
+        if (this.getDimensions()[1] !== matrix.getDimensions()[0]) throw new Error("Dimensions don't match: A: [" + this.getDimensions() + "] B: [" + matrix.getDimensions() + "]"); // check if they can be multiplied
 
 
         let colVectors = [];
 
-        const columns = this.getDimensions()[1];
+        const columns = matrix.getDimensions()[1];
 
         for (let colIndex = 0; colIndex < columns; colIndex++) {
             colVectors.push(this.multByVector(matrix.getCol(colIndex)));
@@ -473,7 +491,7 @@ class Matrix {
 
     getEigenValues() { // needs a lot more testing
 
-        if (!this.isSquare()) return [];
+        if (!this.isSquare()) throw new Error("Can't find eigenvalues of non square matrix");
 
         const n = this.getDimensions()[0];
 
@@ -540,7 +558,7 @@ class Matrix {
     }
 
     static getCharacteristicPolyAt(lambda, matrix) {
-        if (!matrix.isSquare()) return NaN;
+        if (!matrix.isSquare()) throw new Error("Can't find characteristic polynomial of non square matrix");
 
         let A = matrix;
 

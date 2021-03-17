@@ -3,7 +3,7 @@ import Matrix from "./Matrix";
 
 /**
  * Get the last pivot index apart from the ones already covered
- * 
+ *
  * @param {Matrix} reducedMatrix a matrix in ref
  * @returns {number} returns a row index
  */
@@ -33,7 +33,7 @@ function getPivotColumnInRow(reducedMatrix, rowIndex) {
 
 /**
  * Turns a matrix to its rref
- * 
+ *
  * @param {Matrix} matrix A mxn matrix to be reduced
  * @return {{rref:Matrix,conversionMatrix:Matrix,determinant:number}} an object holding the rref, conversion matrix and the determinant
  */
@@ -67,7 +67,7 @@ function rref(matrix) {
                 if (reducedMatrix.get(rowIndex, currentPivotColumn) !== 0) {
 
                     reducedMatrix = reducedMatrix.swapRow(currentPivotRow, rowIndex);
-                    conversionMatrix = reducedMatrix.swapRow(currentPivotRow, rowIndex);
+                    conversionMatrix = conversionMatrix.swapRow(currentPivotRow, rowIndex);
                     determinant *= -1;
 
                     isFullOfZeros = false;
@@ -76,7 +76,7 @@ function rref(matrix) {
 
             if (isFullOfZeros) {
                 currentPivotColumn++;
-                // skip the next 2.steps 
+                // skip the next 2.steps
                 continue;
             }
         }

@@ -6,7 +6,7 @@ class Vector {
     }
 
     dot(vector) {
-        if (vector.getDimension() !== this.getDimension()) return NaN;
+        if (vector.getDimension() !== this.getDimension()) throw new Error("Cannot dot vectors with different dimensions: A: " + this.getDimension() + ", B: " + vector.getDimension());
 
         let sum = 0;
         for (let i = 0; i < this.getDimension(); i++) {
@@ -16,7 +16,7 @@ class Vector {
     }
 
     cross(vector) {
-        if (vector.getDimension() !== 3 || this.getDimension() !== 3) return Vector.nullVector();
+        if (vector.getDimension() !== 3 || this.getDimension() !== 3) throw new Error("Cannot cross vectors with different dimensions: A: " + this.getDimension() + ", B: " + vector.getDimension());
 
         return new Vector([
             this.coordinates[1] * vector.coordinates[2] - this.coordinates[2] * vector.coordinates[1],
@@ -64,7 +64,7 @@ class Vector {
     }
 
     add(vector) {
-        if (vector.getDimension() !== this.getDimension()) return Vector.nullVector();
+        if (vector.getDimension() !== this.getDimension()) throw new Error("Cannot add vectors with different dimensions: A: " + this.getDimension() + ", B: " + vector.getDimension());
 
         for (let i = 0; i < this.getDimension(); i++) {
             this.coordinates[i] += vector.coordinates[i];
@@ -73,7 +73,7 @@ class Vector {
     }
 
     sub(vector) {
-        if (vector.getDimension() !== this.getDimension()) return Vector.nullVector();
+        if (vector.getDimension() !== this.getDimension()) throw new Error("Cannot substract vectors with different dimensions: A: " + this.getDimension() + ", B: " + vector.getDimension());
 
         for (let i = 0; i < this.getDimension(); i++) {
             this.coordinates[i] -= vector.coordinates[i];
@@ -118,14 +118,24 @@ class Vector {
         return true;
     }
 
+    isEmpty() {
+        return this.coordinates.length === 0;
+    }
+
     copyInstance() {
         return new Vector([...this.coordinates]);
     }
 
     toString() {
-        if (this.coordinates.length === 0) return "[]";
+        if (this.isEmpty()) return "[]";
 
-        return this.coordinates + "";
+        let word = "[ ";
+        for (let i = 0; i < this.getDimension(); i++) {
+            word = word + ((i !== 0) ? ", " : "") + this.get(i);
+        }
+        word += " ]";
+
+        return word;
     }
 
     static findAngle(v1, v2) {
@@ -137,7 +147,7 @@ class Vector {
     }
 
     static fromPoints(p1, p2) {
-        if (p1.getDimension() !== p2.getDimension()) return Vector.nullVector();
+        if (p1.getDimension() !== p2.getDimension()) throw new Error("Cannot generate vectors from points with different dimensions: A: " + this.getDimension() + ", B: " + vector.getDimension());
 
         return new Vector(p1.coordinates.map((coord, i) => p2.coordinates[i] - coord));
     }
