@@ -6,18 +6,23 @@ import operators from "./linalg/operators";
 import print from "./helperFunctions/print";
 import basisFinder from "./linalg/BasisFinder";
 
-let A = new Matrix([
-    new Vector([1, 3]),
-    new Vector([2, -4])
-]);
+try {
+    let A = new Matrix([
+        new Vector([0, 1, 1]),
+        new Vector([0, 2, 0]),
+        new Vector([-2, 1, 3])
+    ]);
 
-const nullSpace = basisFinder.findNullSpaceBasis(A);
+    const diagonalized = A.diagonalize();
 
-for (let i = 0; i < nullSpace.length; i++) {
-    print(nullSpace[i]);
+    print(diagonalized.P.toString());
+    print(diagonalized.D.toString());
+    print(diagonalized.invP.toString());
+} catch (error) {
+    console.log("\n\n" + error.message + "\n\n");
 }
 
-console.log(A.getEigenSpaceBases()[1].eigenSpaceBasis) // doesnt work yet
+
 
 /*
 note to self:

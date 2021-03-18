@@ -533,6 +533,31 @@ class Matrix {
         return eigenSpaces;
     }
 
+    diagonalize() {
+        const eigenSpaces = this.getEigenSpaceBases();
+
+        let basis = eigenSpaces.reduce((acc, curr) => acc.concat(curr.eigenSpaceBasis), []);
+
+        basis = Array.from(new Set(basis.map(JSON.stringify)), JSON.parse);
+
+        basis = basis.map(arr => new Vector(arr.coordinates));
+
+        if (basis.length !== this.getDimensions()[0]) throw new Error("Matrix is not diagonalizable");
+
+
+
+        const P = new Matrix(basis);
+        const invP = P.getInverse();
+        const D = invP.mul(this).mul(P);
+
+
+        return {
+            P,
+            invP,
+            D
+        }
+    }
+
     trace() {
         let sum = 0;
 
