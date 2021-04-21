@@ -1,7 +1,8 @@
 import Vector from "./Vector";
 import rref from "./rref";
 import powerIteration from "./powerIteration";
-import basisFinder from "./BasisFinder";
+import basisFinder from "./basisFinder";
+import gramSchmidt from "./gramSchmidt";
 
 class Matrix {
     constructor(vectors) {
@@ -355,10 +356,10 @@ class Matrix {
     }
 
     /**
-     * Returns true if the absolute difference between each entry is within the maxError
      *
      * @param {Matrix} Matrix Matrix that we compare against
-     * @param {number} maxError maximum margin of error
+     * @param {number} maxError maximum margin of error (Defaults to 1e-6)
+     * @returns {Boolean} true if the absolute difference between each entry is within the maxError
      */
     isEqual(matrix, maxError = 1e-6) {
         if (!this.isSameDimensions(matrix)) return false;
@@ -556,6 +557,10 @@ class Matrix {
             invP,
             D
         }
+    }
+
+    decomposeQR() {
+        return gramSchmidt.findQR(this);
     }
 
     trace() {

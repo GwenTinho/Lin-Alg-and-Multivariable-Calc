@@ -31,12 +31,7 @@ class Vector {
     }
 
     isZero() {
-        for (let i = 0; i < this.getDimension(); i++) {
-            if (this.get(i) !== 0) {
-                return false;
-            }
-        }
-        return true
+        return this.getNormSquared() < 1e-6;
     }
 
     getDimension() {
@@ -56,12 +51,15 @@ class Vector {
     }
 
     asUnit() {
-        return this.mult(1 / this.getNorm());
+        const norm = this.getNorm()
+        if (norm === 0) throw new Error("Cannot normalize Zero vector");
+        return this.mult(1 / norm);
     }
 
     mult(number) {
-        this.coordinates = this.coordinates.map(coord => coord * number); // check where this mess appears and think how to fix it to be immutable
-        return this;
+        let res = this.copyInstance()
+        res.coordinates = res.coordinates.map(coord => coord * number); // check where this mess appears and think how to fix it to be immutable
+        return res;
     }
 
     add(vector) {
@@ -76,10 +74,12 @@ class Vector {
     sub(vector) {
         if (vector.getDimension() !== this.getDimension()) throw new Error("Cannot substract vectors with different dimensions: A: " + this.getDimension() + ", B: " + vector.getDimension());
 
-        for (let i = 0; i < this.getDimension(); i++) {
-            this.coordinates[i] -= vector.coordinates[i];
+        let res = this.copyInstance();
+
+        for (let i = 0; i < res.getDimension(); i++) {
+            res.coordinates[i] -= vector.coordinates[i];
         }
-        return this;
+        return res;
     }
 
     /**
@@ -118,6 +118,15 @@ class Vector {
     }
 
     /**
+     *
+     * @param {Vector} vector
+     * @returns
+     */
+    projectOnto(vector) {
+        return vector.mult(this.dot(vector) / vector.getNormSquared());
+    }
+
+    /**
      * Returns true if the absolute difference between each entry is within the maxError
      *
      * @param {Vector} vector vector that we compare against
@@ -151,6 +160,14 @@ class Vector {
         word += " ]";
 
         return word;
+    }
+
+    isOrthogonal(vector) {
+        return Math.abs(this.dot(vector)) < 1e-6;
+    }
+
+    isUnit() {
+        return Math.abs(this.getNormSquared() - 1) < 1e-6;
     }
 
     static findAngle(v1, v2) {

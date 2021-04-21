@@ -4,22 +4,19 @@ import EquationSolver from "./linalg/EquationSolver";
 import InverseTester from "./unitTests/InverseTester";
 import operators from "./linalg/operators";
 import print from "./helperFunctions/print";
-import basisFinder from "./linalg/BasisFinder";
+import basisFinder from "./linalg/basisFinder";
+import gramSchmidt from "./linalg/gramSchmidt";
 
 try {
-    let A = new Matrix([
-        new Vector([0, 1, 1]),
-        new Vector([0, 2, 0]),
-        new Vector([-2, 1, 3])
-    ]);
+    let vectorSet = [
+        new Vector([6, 2, -2, 6]),
+        new Vector([1, 1, -2, 8]),
+        new Vector([-5, 1, 5, -7])
+    ]
 
-    const diagonalized = A.diagonalize();
-
-    print(diagonalized.P.toString());
-    print(diagonalized.D.toString());
-    print(diagonalized.invP.toString());
+    print(gramSchmidt.gramSchmidt(vectorSet));
 } catch (error) {
-    console.log("\n\n" + error.message + "\n\n");
+    console.log("\n\n" + error.stack + "\n\n");
 }
 
 
