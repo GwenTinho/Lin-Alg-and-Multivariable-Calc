@@ -24,7 +24,7 @@ class EquationSolver {
     }
 
     lsa() {
-        if (B.getDimensions()[1] !== 1) throw new Error("Cannot approximate matrix with LSA");
+        if (this.B.getDimensions()[1] !== 1) throw new Error("Cannot approximate matrix with LSA");
 
         let AT = this.A.T();
 

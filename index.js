@@ -8,13 +8,12 @@ import basisFinder from "./linalg/basisFinder";
 import gramSchmidt from "./linalg/gramSchmidt";
 
 try {
-    let vectorSet = [
-        new Vector([6, 2, -2, 6]),
-        new Vector([1, 1, -2, 8]),
-        new Vector([-5, 1, 5, -7])
-    ]
+    let A = new Matrix([
+        new Vector([1, 2]),
+        new Vector([-1, 3])
+    ]);
 
-    print(gramSchmidt.gramSchmidt(vectorSet));
+    print(A.decomposeQR().R);
 } catch (error) {
     console.log("\n\n" + error.stack + "\n\n");
 }
