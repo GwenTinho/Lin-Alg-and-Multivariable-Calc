@@ -8,12 +8,15 @@ import basisFinder from "./linalg/basisFinder";
 import gramSchmidt from "./linalg/gramSchmidt";
 
 try {
-    let A = new Matrix([
-        new Vector([1, 2]),
-        new Vector([-1, 3])
+    let v = new Vector([1, 0]);
+
+    let P = new Matrix([
+        new Vector([0, 0.5, 0.5]),
+        new Vector([0, 1, 0]),
+        new Vector([1, 0, 0]),
     ]);
 
-    print(A.decomposeQR().R);
+    print(P.pow(100).multByVector(v));
 } catch (error) {
     console.log("\n\n" + error.stack + "\n\n");
 }

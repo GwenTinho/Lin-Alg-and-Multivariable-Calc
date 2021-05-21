@@ -420,16 +420,42 @@ class Matrix {
         return new Matrix(vectors);
     }
 
+    /**
+     *
+     * @param {number} n
+     * @returns {Matrix}
+     */
     pow(n) {
-        let accumulator = this.copyInstance();
-        let multiplicator = this.copyInstance();
-        if (this.isSquare()) {
-            for (let i = 0; i < n - 1; i++) {
-                accumulator = accumulator.mul(multiplicator);
+        if (typeof n !== "number") throw TypeError("n is not a number");
+
+        const [rows, cols] = this.getDimensions();
+
+        if (this.isDiagonal()) {
+            const out = this.copyInstance();
+
+            for (let i = 0; i < rows; i++) {
+                out.set(i, i, Math.pow(this.get(i, i), n));
             }
+
+            return out;
         }
 
-        return accumulator;
+        try {
+            const { P, D, invP } = this.diagonalize();
+            return P.mul(D.pow(n)).mul(invP);
+        } catch (e) {
+            let accumulator = this.copyInstance();
+            const multiplicator = this.copyInstance();
+            if (this.isSquare()) {
+                for (let i = 0; i < n - 1; i++) {
+                    accumulator = accumulator.mul(multiplicator); // super inefficient rn
+                }
+            }
+
+            return accumulator;
+        }
+
+
     }
 
     swapCol(idx1, idx2) {
