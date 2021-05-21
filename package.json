@@ -4,8 +4,8 @@
     "description": "",
     "main": "app.js",
     "scripts": {
-        "test": "nodemon --exec babel-node --max-old-space-size=8192 index",
-        "start": "babel-node --max-old-space-size=8192 index"
+        "build": "tsc",
+        "start": "npm run build && node ./target"
     },
     "author": "",
     "license": "ISC",
