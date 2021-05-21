@@ -1,8 +1,21 @@
 import { BigFloat } from "../BigFloat";
 import { Complex } from "../Complex";
 
-class Vector {
+export class Vector {
     constructor(private coordinates: Complex[]) { }
+
+    static fromStrings(col: string) {
+        return new Vector(col.split(" ").map(expr => {
+            const splitExpr = expr.split("[+-]");
+            const real = BigFloat.fromNumber(parseFloat(splitExpr[0]));
+            let imag: BigFloat;
+
+            if (splitExpr[1]) imag = BigFloat.fromNumber(parseFloat(splitExpr[1]));
+            else imag = BigFloat.ZERO;
+
+            return new Complex(real, imag);
+        }));
+    }
 
     dot(vector: Vector) {
         if (!vector) throw new Error("vector is falsy");
@@ -47,6 +60,10 @@ class Vector {
 
     norm() {
         return this.sqrNorm().sqrt();
+    }
+
+    compl() {
+        return new Vector(this.coordinates.map(coord => coord.compl()));
     }
 
     asUnit() {
@@ -157,7 +174,7 @@ class Vector {
 
         let word = "[ ";
         for (let i = 0; i < this.dimensions(); i++) {
-            word = word + ((i !== 0) ? ", " : "") + this.get(i);
+            word = word + ((i !== 0) ? ", " : "") + this.get(i).toString();
         }
         word += " ]";
 
@@ -193,5 +210,3 @@ class Vector {
         return new Vector(new Array(n).fill(Complex.ZERO));
     }
 }
-
-export default Vector;
