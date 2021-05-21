@@ -5,8 +5,9 @@
     "main": "app.js",
     "scripts": {
         "build": "tsc",
-        "start": "npm run build && node ./target"
+        "start": "npm run build && node --experimental-specifier-resolution=node ./target"
     },
+    "type": "module",
     "author": "",
     "license": "ISC",
     "dependencies": {
