@@ -52,6 +52,8 @@ export class BigFloat {
     }
 
     toString() {
+        if (this.denominator === 1n) return this.numerator + "";
+
         return `${this.numerator}/${this.denominator}`;
     }
 
