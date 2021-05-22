@@ -106,3 +106,5 @@ dist
 # Typescript output
 
 target/
+
+.txt
