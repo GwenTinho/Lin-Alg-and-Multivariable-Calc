@@ -12,7 +12,7 @@ export class Complex {
 
     equals(val: Complex, precision = BigFloat.ZERO) {
 
-        if (precision.isZero()) return this.real === val.real && this.imag === val.imag;
+        if (precision.isZero()) return this.real.equals(val.real) && this.imag.equals(val.imag);
 
         return this.sqrDist(val).lte(precision);
     }
@@ -62,12 +62,12 @@ export class Complex {
         return this.real.gt(val) || this.real.equals(val);
     }
 
-    isReal() {
-        return this.imag.isZero();
+    isReal(precision = BigFloat.ZERO) {
+        return this.imag.isZero(precision);
     }
 
-    isImag() {
-        return this.real.isZero();
+    isImag(precision = BigFloat.ZERO) {
+        return this.real.isZero(precision);
     }
 
     sqrMag() {
@@ -148,10 +148,16 @@ export class Complex {
      * @returns the argumeent of the complex number as a BigFloat, calculation might be lossy so beware
      */
     arg() {
-        return this.imag.div(this.real).atan();
+        // following this https://en.wikipedia.org/wiki/Argument_(complex_analysis) (uniform formula)
+        if (!this.imag.equals(BigFloat.ZERO)) return this.mag().sub(this.real).div(this.imag).atan().mul(BigFloat.fromNumber(2));
+        if (this.real.lt(BigFloat.ZERO) && this.imag.equals(BigFloat.ZERO)) return BigFloat.fromNumber(Math.PI);
+        if (this.real.gt(BigFloat.ZERO) && this.imag.equals(BigFloat.ZERO)) return BigFloat.ZERO;
+
+        throw new Error("argument of " + this.toString() + " is undefined");
     }
 
     pow(val: Complex) {
+        debugger
         const e = BigFloat.fromNumber(Math.E);
 
         const resMag = this.mag().mul(e.pow(this.arg().neg().mul(val.imag))); // using the formula z^w = r * e^(-b^theta) * e^(i*a*theta)
@@ -161,6 +167,11 @@ export class Complex {
             resMag.mul(resArg.cos()),
             resMag.mul(resArg.sin())
         );
+    }
+
+    sqrt() {
+        debugger
+        return this.pow(Complex.fromReal(new BigFloat(1n, 2n)));
     }
 
     sqrDist(val: Complex) {
@@ -185,7 +196,12 @@ export class Complex {
         );
     }
 
+    toValuePair() {
+        return [this.real.toValue(), this.imag.toValue()];
+    }
+
     static fromReal(val: BigFloat) {
+        console.log(val.cpy())
         return new Complex(
             val.cpy(),
             BigFloat.ZERO
