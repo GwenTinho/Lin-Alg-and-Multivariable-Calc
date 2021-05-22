@@ -114,8 +114,12 @@ export class Vector {
         throw new Error("Cannot compare zero vector");
     }
 
-    neg(row: number) {
+    negEntry(row: number) {
         return new Vector(this.coordinates.map((coord, i) => i === row ? coord.neg() : coord));
+    }
+
+    neg() {
+        return new Vector(this.coordinates.map(coord => coord.neg()));
     }
 
     set(row: number, value: Complex) {
