@@ -33,7 +33,7 @@ export class Matrix {
     static fromStrings(rows: string[]) {
         return (new Matrix(
             rows.map(rowString => new Vector(rowString.split(" ").map(expr => {
-                // TODO: known bug, with minuses
+                // TODO: known bug, with minuses and imaginary numbers in general
 
                 const splitExpr = expr.split("[+-]");
 
@@ -338,8 +338,12 @@ export class Matrix {
         return new Matrix(this.vectors.map((colV, rowIdx) => row === rowIdx ? colV.set(row, value) : colV.cpy()));
     }
 
-    neg(row: number, column: number) {
-        return new Matrix(this.vectors.map((colV, rowIdx) => row === rowIdx ? colV.neg(row) : colV.cpy()));
+    negEntry(row: number, column: number) {
+        return new Matrix(this.vectors.map((colV, colIdx) => column === colIdx ? colV.negEntry(row) : colV.cpy()));
+    }
+
+    neg() {
+        return new Matrix(this.vectors.map(colV => colV.neg()));
     }
 
     truncate(n: number) {
