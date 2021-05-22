@@ -1,11 +1,13 @@
 import { abs, exp10, gcd, pm, sign } from "./utils";
 
+
 // following this https://jrsinclair.com/articles/2020/sick-of-the-jokes-write-your-own-arbitrary-precision-javascript-math-library/
 
 export class BigFloat {
     static readonly ZERO = new BigFloat(0n, 1n);
     static readonly ONE = new BigFloat(1n, 1n);
     static readonly PRECISION = 100;
+    static readonly PRINTPRECISION = BigFloat.fromNumber(1e-10);
 
     constructor(
         private numerator: bigint,
@@ -24,7 +26,7 @@ export class BigFloat {
         return new BigFloat((sgn * n) / f, d / f);
     }
 
-    isZero(precision = BigFloat.ZERO) {
+    isZero(precision = BigFloat.ZERO) { // its kinda lame but i plan on adding more functionality to this and dont want to break the established pattern
         return this.numerator === 0n;
     }
 
@@ -52,6 +54,8 @@ export class BigFloat {
     }
 
     toString() {
+        if (this.abs().lte(BigFloat.PRINTPRECISION)) return "0";
+
         if (this.denominator === 1n) return this.numerator + "";
 
         return `${this.numerator}/${this.denominator}`;
@@ -261,7 +265,11 @@ export class BigFloat {
     }
 
     atan() {
-        return BigFloat.fromNumber(Math.atan(this.toValue()));
+        debugger;
+        const temp = BigFloat.fromNumber(Math.atan(this.toValue()));
+
+
+        return temp;
     }
 
     acos() {
