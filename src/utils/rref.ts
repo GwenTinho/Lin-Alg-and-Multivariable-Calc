@@ -26,7 +26,6 @@ function getPivotColumnInRow(reducedMatrix: Matrix, rowIndex: number) {
 
 
 export function rref(matrix: Matrix) {
-
     const rows = matrix.dimensions()[0];
     const columns = matrix.dimensions()[1];
     const isSquare = rows === columns;
@@ -110,9 +109,8 @@ export function rref(matrix: Matrix) {
                 conversionMatrix = conversionMatrix.addMultRow(rowIndex, lastPivotColumn, scalar3);
             }
         }
-
         lastPivotRow--;
-        lastPivotColumn = getPivotColumnInRow(reducedMatrix, lastPivotRow);
+        if (lastPivotRow >= 0) lastPivotColumn = getPivotColumnInRow(reducedMatrix, lastPivotRow);
     }
 
 
