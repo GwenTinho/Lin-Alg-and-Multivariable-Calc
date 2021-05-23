@@ -46,8 +46,6 @@ export class Vector {
         for (let i = 0; i < this.dimensions(); i++) {
             sum = sum.add(this.coordinates[i].sqrMag());
         }
-        // bug has smth to do with an overflow around here
-
         return sum;
     }
 

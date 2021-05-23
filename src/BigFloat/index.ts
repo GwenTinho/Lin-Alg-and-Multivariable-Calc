@@ -183,17 +183,25 @@ export class BigFloat {
         if (num === BigInt(0)) return BigFloat.ZERO;
         if (num < 0) throw new Error("Cannot take negative root");
         // nth root algo:
-        const iterations = 4;
 
-        let res = BigFloat.fromNumber(
-            Math.pow(Number(num), 1 / Number(n))
-        );
+        // generous approximation
+        let res = BigFloat.simplify(num, n ** 2n);
+
+        let iterations = 5;
+
+        // safety margins, could be closer to 53 but this will do for now
+        if ((num >> 50n) < 1n) {
+            res = BigFloat.fromNumber(
+                Math.pow(Number(num), 1 / Number(n))
+            );
+            iterations = 4;
+        }
 
         for (let index = 0; index < iterations; index++) {
             res = BigFloat.simplify(
-                n - res.numerator ** n + num * (res.denominator ** n),
+                (n - 1n) * res.numerator ** n + num * res.denominator ** n,
                 n * res.denominator * res.numerator ** (n - 1n)
-            )
+            );
         }
 
         return res;
@@ -211,21 +219,24 @@ export class BigFloat {
             return BigFloat.ZERO;
         }
 
-        if (exp.lt(BigFloat.ONE) && exp.sign() === 1n && this.sign() === -1n)
+        //if (exp.lt(BigFloat.ONE) && exp.sign() === 1n && this.sign() === -1n) {
 
-            if (exp.denominator === 1n) {
-                return BigFloat.simplify(
-                    this.numerator ** exp.numerator,
-                    this.denominator ** exp.numerator
-                );
-            }
+        if (exp.denominator === 1n) {
+            return BigFloat.simplify(
+                this.numerator ** exp.numerator,
+                this.denominator ** exp.numerator
+            );
+        }
 
         const rootNumer = BigFloat.nthRoot(this.numerator, exp.denominator);
-        const rootDenom = BigFloat.nthRoot(this.numerator, exp.denominator);
+        const rootDenom = BigFloat.nthRoot(this.denominator, exp.denominator);
 
         const rootDiv = rootNumer.div(rootDenom);
 
         return new BigFloat(rootDiv.numerator ** exp.numerator, rootDiv.denominator ** exp.numerator);
+
+
+        //throw new Error("Something went very wrong");
     }
 
     floorLog10(): BigFloat {

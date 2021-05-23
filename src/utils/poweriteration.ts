@@ -17,9 +17,7 @@ export function powerIteration(matrix: Matrix, eigenValues: Complex[] = [], dept
 
     for (let i = 0; i < iterations; i++) {
         let prod_A_b_k = matrix.multByVector(b_k);
-
-        console.log(prod_A_b_k.norm());
-
+        // TODO make this not cause a memory leak cause of multiple square roots
         b_k = prod_A_b_k.divReal(prod_A_b_k.norm());
     }
 
