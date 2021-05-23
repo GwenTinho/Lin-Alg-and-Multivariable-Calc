@@ -107,4 +107,4 @@ dist
 
 target/
 
-.txt
+log.txt
