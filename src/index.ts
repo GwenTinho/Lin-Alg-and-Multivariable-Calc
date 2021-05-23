@@ -5,17 +5,23 @@ import { clearLogs } from "./utils/logger";
 import print from "./utils/print";
 import { Vector } from "./Vector";
 
+BigFloat.flipPrintType();
+
 try {
-    clearLogs();
+    //clearLogs(); // up next, testing yey + ortho diag
 
     const A = Matrix.fromStrings([
-        "2 9 0",
-        "1 3 5",
-        "2 4 7"
+        "8 6",
+        "-3 2"
     ]);
 
-    print(A.getInverse());
-    print(A.getInverse().mul(A));
+    debugger
+
+    A.getEigenSpaceBases().forEach(el => {
+        print(el.eigenValue);
+        print(el.eigenSpaceBasis);
+    });
+
 } catch (error) {
     console.log("\n\n" + error.stack + "\n\n");
 }

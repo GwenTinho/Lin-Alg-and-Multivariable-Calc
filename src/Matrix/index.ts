@@ -31,22 +31,7 @@ export class Matrix {
     }
 
     static fromStrings(rows: string[]) {
-        return (new Matrix(
-            rows.map(rowString => new Vector(rowString.split(" ").map(expr => {
-                // TODO: known bug, with minuses and imaginary numbers in general
-
-                const splitExpr = expr.split("[+-]");
-
-
-                const real = BigFloat.fromNumber(parseFloat(splitExpr[0]));
-                let imag: BigFloat;
-
-                if (splitExpr[1]) imag = BigFloat.fromNumber(parseFloat(splitExpr[1]));
-                else imag = BigFloat.ZERO;
-
-                return new Complex(real, imag);
-            })
-            )))).T();
+        return (new Matrix(rows.map(Vector.fromStrings))).T();
     }
 
     /**
@@ -185,40 +170,33 @@ export class Matrix {
 
         for (let i = 0; i < size; i++) {
             for (let j = 0; j < size; j++) {
-                if (i > j && this.get(i, j).isZero()) {
-                    this.upperTriangular = false;
+                if (i > j && !this.get(i, j).isZero()) {
                     return false;
                 }
             }
         }
-        this.upperTriangular = true;
         return true;
     }
 
     isLowerTriangular() {
         if (!this.isSquare()) return false;
-        if (typeof this.lowerTriangular === "boolean") return this.lowerTriangular;
 
         const size = this.dimensions()[0];
 
         for (let i = 0; i < size; i++) {
             for (let j = 0; j < size; j++) {
-                if (i < j && this.get(i, j).isZero()) {
-                    this.lowerTriangular = false;
+                if (i < j && !this.get(i, j).isZero()) {
                     return false;
                 }
             }
         }
-        this.lowerTriangular = true;
         return true;
     }
 
     isTriangular() {
         if (!this.isSquare()) return false;
-        if (typeof this.triangular === "boolean") return this.triangular;
 
-        this.triangular = this.isLowerTriangular() || this.isUpperTriangular();
-        return this.triangular;
+        return this.isLowerTriangular() || this.isUpperTriangular();
     }
 
     isDiagonal() {
@@ -536,12 +514,8 @@ export class Matrix {
         return new Matrix(this.vectors.map(v => v.set(oldRow, v.get(oldRow).add(v.get(rowToBeAdded).mul(scalar)))));
     }
 
-    // my own very brute force way of getting one eigenvalue, there's still ways to go but it'll do for now
-    // a fun way would be to find one eigenvalue then divide the determinant function by (lambda - found eigenvalue)
-
-
-
-    getEigenValues() { // we just kinda pray that eigenvalues are real
+    getEigenValues() {
+        debugger
 
         if (!this.isSquare()) throw new Error("Can't find eigenvalues of non square matrix");
 
@@ -555,7 +529,7 @@ export class Matrix {
             return eigenValues;
         }
 
-        // uses this https://en.wikipedia.org/wiki/Power_iteration , my old algo is just stupid
+        // uses this https://en.wikipedia.org/wiki/Power_iteration
 
         return powerIteration(this);
     }
@@ -574,6 +548,7 @@ export class Matrix {
 
     getEigenSpaceBases() {
         let eigenSpaces = [];
+        debugger
         const eigenValues = this.getEigenValues();
 
         for (let i = 0; i < eigenValues.length; i++) {

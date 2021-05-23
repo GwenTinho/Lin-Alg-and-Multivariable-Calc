@@ -113,10 +113,5 @@ export function rref(matrix: Matrix) {
         if (lastPivotRow >= 0) lastPivotColumn = getPivotColumnInRow(reducedMatrix, lastPivotRow);
     }
 
-
-    for (let i = 0; i < rows && !determinant.isZero(); i++) {
-        determinant = determinant.mul(reducedMatrix.get(i, i));
-    }
-
     return { rref: reducedMatrix, conversionMatrix, determinant };
 }

@@ -5,16 +5,7 @@ export class Vector {
     constructor(private coordinates: Complex[]) { }
 
     static fromStrings(col: string) {
-        return new Vector(col.split(" ").map(expr => {
-            const splitExpr = expr.split("[+-]");
-            const real = BigFloat.fromNumber(parseFloat(splitExpr[0]));
-            let imag: BigFloat;
-
-            if (splitExpr[1]) imag = BigFloat.fromNumber(parseFloat(splitExpr[1]));
-            else imag = BigFloat.ZERO;
-
-            return new Complex(real, imag);
-        }));
+        return new Vector(col.split(" ").map(Complex.fromString));
     }
 
     dot(vector: Vector) {
@@ -55,6 +46,8 @@ export class Vector {
         for (let i = 0; i < this.dimensions(); i++) {
             sum = sum.add(this.coordinates[i].sqrMag());
         }
+        // bug has smth to do with an overflow around here
+
         return sum;
     }
 
@@ -205,7 +198,7 @@ export class Vector {
         const coords = [];
 
         for (let index = 0; index < n; index++) {
-            coords.push(Complex.fromReal(BigFloat.fromNumber(Math.floor(Math.random() * 11))));
+            coords.push(new Complex(BigFloat.fromNumber(Math.floor(Math.random() * 11)), BigFloat.fromNumber(Math.floor(Math.random() * 11))));
         }
         return new Vector(coords);
     }

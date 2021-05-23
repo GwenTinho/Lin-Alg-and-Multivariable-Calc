@@ -2,12 +2,14 @@ import { abs, exp10, gcd, pm, sign } from "./utils";
 
 
 // following this https://jrsinclair.com/articles/2020/sick-of-the-jokes-write-your-own-arbitrary-precision-javascript-math-library/
+// name is kind of a lie doe
 
 export class BigFloat {
     static readonly ZERO = new BigFloat(0n, 1n);
     static readonly ONE = new BigFloat(1n, 1n);
     static readonly PRECISION = 100;
     static readonly PRINTPRECISION = BigFloat.fromNumber(1e-10);
+    private static PRINTTYPE: "FLOAT" | "RATIO" = "FLOAT";
 
     constructor(
         private numerator: bigint,
@@ -45,6 +47,17 @@ export class BigFloat {
         return this.sqrDist(val).lte(precision);
     }
 
+    static fromString(nbrString: string) {
+        return BigFloat.fromNumber(parseFloat(nbrString));
+    }
+
+    static flipPrintType() {
+        if (BigFloat.PRINTTYPE === "FLOAT") BigFloat.PRINTTYPE = "RATIO";
+        else BigFloat.PRINTTYPE = "FLOAT";
+
+        return BigFloat;
+    }
+
     sign() {
         return sign(this.numerator) * sign(this.denominator);
     }
@@ -55,6 +68,8 @@ export class BigFloat {
 
     toString() {
         if (this.abs().lte(BigFloat.PRINTPRECISION)) return "0";
+
+        if (BigFloat.PRINTTYPE === "FLOAT") return this.toValue() + "";
 
         if (this.denominator === 1n) return this.numerator + "";
 
@@ -198,7 +213,7 @@ export class BigFloat {
 
         if (exp.lt(BigFloat.ONE) && exp.sign() === 1n && this.sign() === -1n)
 
-            if (exp.denominator === BigInt(1)) {
+            if (exp.denominator === 1n) {
                 return BigFloat.simplify(
                     this.numerator ** exp.numerator,
                     this.denominator ** exp.numerator
@@ -214,8 +229,8 @@ export class BigFloat {
     }
 
     floorLog10(): BigFloat {
-        if (this.equals(BigFloat.simplify(BigInt(0), BigInt(1)))) {
-            return new BigFloat(BigInt(-1), BigInt(0));
+        if (this.isZero()) {
+            return new BigFloat(-1n, 0n);
         }
         return this.numerator >= this.denominator
             ? BigFloat.simplify(BigInt((this.numerator / this.denominator).toString().length - 1), 1n)

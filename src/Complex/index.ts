@@ -10,6 +10,51 @@ export class Complex {
         private imag: BigFloat
     ) { }
 
+    static fromString(expr: string) {
+        let tokens = expr.match(/\d+\.?\d*e[+-]?\d+|\d+\.?\d*|\.\d+|./g)?.filter(val => val !== " ");
+
+        if (
+            tokens === undefined ||
+            tokens.length !== 1 &&
+            tokens.length !== 2 &&
+            tokens.length !== 4 &&
+            tokens.length !== 5
+        ) throw new Error("Can't parse invalid expression: " + expr);
+
+        // still needs testing and i can already smell all the edge cases
+
+        if (tokens[tokens.length - 1] === "i") throw new Error("unsupported complex format: " + expr + "\n format is a + ib");
+
+        let real = BigFloat.ZERO;
+        let imag = BigFloat.ZERO;
+        let imagFlag = false;
+        let sign = "";
+
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+
+            if (token === "i") {
+                imagFlag = true;
+                continue;
+            }
+
+            if (token === "+" || token === "-") {
+                sign = token === "-" ? "-" : "";
+                continue;
+            }
+
+            if (!!parseFloat(token) || parseFloat(token) === 0) {
+                if (imagFlag) {
+                    imag = BigFloat.fromString(token);
+                } else {
+                    real = BigFloat.fromString(token);
+                }
+            }
+        }
+
+        return new Complex(real, imag);
+    }
+
     equals(val: Complex, precision = BigFloat.ZERO) {
 
         if (precision.isZero()) return this.real.equals(val.real) && this.imag.equals(val.imag);
