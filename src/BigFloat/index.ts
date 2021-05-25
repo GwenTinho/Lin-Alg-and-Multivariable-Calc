@@ -69,7 +69,7 @@ export class BigFloat {
     toString() {
         if (this.abs().lte(BigFloat.PRINTPRECISION)) return "0";
 
-        if (BigFloat.PRINTTYPE === "FLOAT") return this.toValue() + "";
+        if (BigFloat.PRINTTYPE === "FLOAT") return this.toValue() + ""; // breaks for huge numbers rn
 
         if (this.denominator === 1n) return this.numerator + "";
 
@@ -248,8 +248,55 @@ export class BigFloat {
             : BigFloat.simplify(BigInt(-1), BigInt(1)).sub(this.invert().floorLog10());
     }
 
+    reducePrecision(digitsToKeep: number) { // mb this helps?
+        const offset = new BigFloat(BigInt(10 ** digitsToKeep), 1n);
+
+        return this.mul(offset).floor().div(offset);
+    }
+
     sqrt() {
-        return this.pow(new BigFloat(1n, 2n));
+        // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+
+        const half = new BigFloat(1n, 2n);
+        let x: BigFloat;
+        let babyIter = 7;
+
+        // Babylonian method for the first 4 steps
+
+        /*
+        Optimization for ratios:
+
+        goal find sqrt(S), x = a/b; S = p/q
+
+        start value: pick S/2 (close enough)
+
+        basic baby: x' = (x + S/x)/2
+
+        ratio baby:
+
+        a' = q * a ** 2 + p * b ** 2
+        b' = 2 * q * a * b
+        */
+
+
+        x = this.mul(half);
+
+
+        for (let index = 0; index < babyIter; index++) {
+            const a = x.numerator;
+            const b = x.denominator;
+            const p = this.numerator;
+            const q = this.denominator;
+
+            const qa = q * a;
+
+            x = BigFloat.simplify(
+                qa * a + p * b * b,
+                2n * qa * b
+            ).reducePrecision(15); // for now
+        }
+
+        return x;
     }
 
     sqr() {
