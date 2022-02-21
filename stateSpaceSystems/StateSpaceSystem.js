@@ -28,7 +28,7 @@ class StateSpaceSystem{
 
         const n = this.A.getDimensions()[0];
 
-        let inverseTerm = Matrix.getIdentityMatrixMultiple(n,0);
+        let inverseTerm = Matrix.getZeroMatrix(n,n);
 
         for (let i = 0; i < n; i++) {
             inverseTerm = inverseTerm.add(auxMatricies[i].multByReal(s ** (n-i)));
@@ -36,5 +36,11 @@ class StateSpaceSystem{
         inverseTerm = inverseTerm.multByReal(1/polyAt);
 
         return this.C.mul(inverseTerm).mul(this.B).add(this.D);
+    }
+
+    impulseResponseAt(t){
+        // assume D = 0 otherwise i have no idea how to approx dirac
+
+        return this.C.mul(this.A.multByReal(t).exp()).mul(this.C);
     }
 }

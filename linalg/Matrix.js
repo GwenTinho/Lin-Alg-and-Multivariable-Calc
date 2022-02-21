@@ -5,6 +5,7 @@ import basisFinder from "./basisFinder";
 import gramSchmidt from "./gramSchmidt";
 import fadeev from "./fadeev";
 import Polynomial from "./Polynomial";
+import mathHelpers from "../helperFunctions/mathHelpers";
 
 class Matrix {
     /**
@@ -454,7 +455,7 @@ class Matrix {
             const multiplicator = this.copyInstance();
             if (this.isSquare()) {
                 for (let i = 0; i < n - 1; i++) {
-                    accumulator = accumulator.mul(multiplicator); // super inefficient rn
+                    accumulator = accumulator.mul(multiplicator); // super inefficient rn // implement square and add algorithm here TODO
                 }
             }
 
@@ -591,6 +592,25 @@ class Matrix {
         }
     }
 
+    fadeev() { // could be part of initializer
+        return fadeev.fadeev(this);
+    }
+
+    /**
+     * Calculates e^A for the matrix
+     */
+    exp() {
+        let acc = Matrix.getZeroMatrix(...this.getDimensions());
+
+        const k = 7;
+
+        for (let i = 0; i < k; i++) {
+            acc = acc.add(this.pow(i)).multByReal(1/mathHelpers.fac(i));
+        }
+
+        return acc;
+    }
+
     decomposeQR() {
         return gramSchmidt.findQR(this);
     }
@@ -674,6 +694,18 @@ class Matrix {
         }
 
         return new Matrix(columnVectors);
+    }
+
+    static getZeroMatrix(n,m) {
+        let columns = new Array(m);
+        for (let i = 0; i < n; i++) {
+            let columnVector = new Array(n);
+            for (let j = 0; j < n; j++) {
+                columnVector[j] = 0;
+            }
+            columnVectors[i] = new Vector(columnVector);
+        }
+        return new Matrix(columns);
     }
 
     static fastDet2d(arr1, arr2) {
