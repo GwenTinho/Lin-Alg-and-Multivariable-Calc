@@ -44,3 +44,5 @@ class StateSpaceSystem{
         return this.C.mul(this.A.multByReal(t).exp()).mul(this.C);
     }
 }
+
+export default StateSpaceSystem
