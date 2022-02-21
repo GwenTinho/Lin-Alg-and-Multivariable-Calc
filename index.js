@@ -6,17 +6,16 @@ import operators from "./linalg/operators";
 import print from "./helperFunctions/print";
 import basisFinder from "./linalg/basisFinder";
 import gramSchmidt from "./linalg/gramSchmidt";
+import fadeev from "./linalg/fadeev";
 
 try {
-    let v = new Vector([1, 0]);
-
-    let P = new Matrix([
-        new Vector([0, 0.5, 0.5]),
-        new Vector([0, 1, 0]),
-        new Vector([1, 0, 0]),
+    const A = new Matrix([
+        new Vector([0,1,0]),
+        new Vector([0,0,1]),
+        new Vector([2,1,3])
     ]);
 
-    print(P.pow(100).multByVector(v));
+    print(fadeev.fadeev(A).auxMatricies);
 } catch (error) {
     console.log("\n\n" + error.stack + "\n\n");
 }

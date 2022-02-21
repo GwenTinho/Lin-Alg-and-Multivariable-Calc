@@ -3,8 +3,14 @@ import rref from "./rref";
 import powerIteration from "./powerIteration";
 import basisFinder from "./basisFinder";
 import gramSchmidt from "./gramSchmidt";
+import fadeev from "./fadeev";
+import Polynomial from "./Polynomial";
 
 class Matrix {
+    /**
+     *
+     * @param {Vector[]} vectors an array of columns vectors
+     */
     constructor(vectors) {
 
         if (vectors.length !== 0) this.vectors = vectors; // matrix as array of column vectors
@@ -621,16 +627,14 @@ class Matrix {
         return new Matrix(this.getVectors().slice(1).map(v => new Vector(v.getCoordinates().slice(1))));
     }
 
-    static getCharacteristicPolyAt(lambda, matrix) {
+    static getCharacteristicPolyAt(x, matrix) {
         if (!matrix.isSquare()) throw new Error("Can't find characteristic polynomial of non square matrix");
 
-        let A = matrix;
+        let {characteristicPolyTerms} = fadeev.fadeev(matrix); // mb make this run by default on init TODO
 
-        const n = A.getDimensions()[0];
+        let p = new Polynomial(new Vector(characteristicPolyTerms));
 
-        let AminusLambda = A.sub(Matrix.getIdentityMatrixMultiple(n, lambda));
-
-        return AminusLambda.getDeterminant();
+        return p.eval(x)
     }
 
     static getIdentityMatrix(n) {
@@ -650,14 +654,20 @@ class Matrix {
         return new Matrix(columnVectors);
     }
 
-    static getIdentityMatrixMultiple(n, lambda) {
+    /**
+     *
+     * @param {number} n size of square matrix
+     * @param {number} k value along the diagonal
+     * @returns
+     */
+    static getIdentityMatrixMultiple(n, k) {
         let columnVectors = new Array(n);
 
         for (let i = 0; i < n; i++) {
             let columnVector = new Array(n);
 
             for (let j = 0; j < n; j++) {
-                if (i === j) columnVector[j] = lambda;
+                if (i === j) columnVector[j] = k;
                 else columnVector[j] = 0;
             }
             columnVectors[i] = new Vector(columnVector);
