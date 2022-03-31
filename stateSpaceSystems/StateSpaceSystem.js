@@ -43,6 +43,38 @@ class StateSpaceSystem{
 
         return this.C.mul(this.A.multByReal(t).exp()).mul(this.C);
     }
+
+    controllability(){
+        const copyB = this.B.copyInstance();
+
+        if(copyB.getDimensions()[1] != 1){
+            throw new Error("Bad dimensions or smth");
+        }
+
+        const columns = [copyB.getCol(0)];
+
+        for (let i = 0; i < this.A.getDimensions()[0] - 1; i++) {
+            columns.push(this.A.multByVector(columns[columns.length - 1]));
+        }
+
+        return new Matrix(columns);
+    }
+
+    observability(){
+        const copyC = this.C.copyInstance();
+
+        if(copyB.getDimensions()[0] != 1){
+            throw new Error("Bad dimensions or smth");
+        }
+
+        const rows = [copyC.getRow(0)];
+
+        for (let i = 0; i < this.A.getDimensions()[0] - 1; i++) {
+            rows.push(this.A.T().multByVector(rows[rows.length-1]));
+        }
+
+        return (new Matrix(rows)).T();
+    }
 }
 
 export default StateSpaceSystem
